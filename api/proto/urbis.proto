@@ -1,0 +1,338 @@
+syntax = "proto3";
+
+package urbis;
+
+option go_package = "github.com/urbis/api/pkg/pb";
+
+// =============================================================================
+// Basic Geometry Types
+// =============================================================================
+
+// 2D Point
+message Point {
+  double x = 1;
+  double y = 2;
+}
+
+// Minimum Bounding Rectangle (axis-aligned bounding box)
+message MBR {
+  double min_x = 1;
+  double min_y = 2;
+  double max_x = 3;
+  double max_y = 4;
+}
+
+// LineString - sequence of connected points
+message LineString {
+  repeated Point points = 1;
+}
+
+// Polygon with exterior ring and optional holes
+message Polygon {
+  repeated Point exterior = 1;
+  repeated Ring holes = 2;
+}
+
+// Ring (used for polygon holes)
+message Ring {
+  repeated Point points = 1;
+}
+
+// Geometry type enumeration
+enum GeomType {
+  GEOM_POINT = 0;
+  GEOM_LINESTRING = 1;
+  GEOM_POLYGON = 2;
+}
+
+// Spatial object containing geometry and metadata
+message SpatialObject {
+  uint64 id = 1;
+  GeomType type = 2;
+  oneof geometry {
+    Point point = 3;
+    LineString line = 4;
+    Polygon polygon = 5;
+  }
+  Point centroid = 6;
+  MBR mbr = 7;
+  bytes properties = 8;  // JSON encoded properties
+}
+
+// =============================================================================
+// Configuration
+// =============================================================================
+
+message Config {
+  uint64 block_size = 1;      // Max objects per block (default: 1024)
+  uint64 page_capacity = 2;   // Max objects per page (default: 64)
+  uint64 cache_size = 3;      // Page cache size (default: 128)
+  bool enable_quadtree = 4;   // Enable quadtree for adjacency (default: true)
+  bool persist = 5;           // Enable persistence (default: false)
+  string data_path = 6;       // Path for data file (if persist=true)
+}
+
+// =============================================================================
+// Statistics
+// =============================================================================
+
+message Stats {
+  uint64 total_objects = 1;
+  uint64 total_blocks = 2;
+  uint64 total_pages = 3;
+  uint64 total_tracks = 4;
+  double avg_objects_per_page = 5;
+  double page_utilization = 6;
+  uint64 kdtree_depth = 7;
+  uint64 quadtree_depth = 8;
+  MBR bounds = 9;
+}
+
+// Page information for disk-aware queries
+message PageInfo {
+  uint32 page_id = 1;
+  uint32 track_id = 2;
+}
+
+// =============================================================================
+// Request/Response Messages
+// =============================================================================
+
+// --- Index Management ---
+
+message CreateIndexRequest {
+  string index_id = 1;  // Client-provided index identifier
+  Config config = 2;    // Optional configuration
+}
+
+message CreateIndexResponse {
+  string index_id = 1;
+  string message = 2;
+}
+
+message DestroyIndexRequest {
+  string index_id = 1;
+}
+
+message DestroyIndexResponse {
+  string message = 1;
+}
+
+message ListIndexesRequest {}
+
+message ListIndexesResponse {
+  repeated string index_ids = 1;
+}
+
+// --- Data Loading ---
+
+message LoadGeoJSONRequest {
+  string index_id = 1;
+  string path = 2;  // File path to GeoJSON
+}
+
+message LoadGeoJSONStringRequest {
+  string index_id = 1;
+  string geojson = 2;  // GeoJSON content as string
+}
+
+message LoadWKTRequest {
+  string index_id = 1;
+  string wkt = 2;  // WKT geometry string
+}
+
+message LoadResponse {
+  uint64 objects_loaded = 1;
+  string message = 2;
+}
+
+// --- Object Operations ---
+
+message InsertPointRequest {
+  string index_id = 1;
+  double x = 2;
+  double y = 3;
+}
+
+message InsertLineStringRequest {
+  string index_id = 1;
+  repeated Point points = 2;
+}
+
+message InsertPolygonRequest {
+  string index_id = 1;
+  repeated Point exterior = 2;
+}
+
+message InsertResponse {
+  uint64 object_id = 1;
+}
+
+message RemoveRequest {
+  string index_id = 1;
+  uint64 object_id = 2;
+}
+
+message RemoveResponse {
+  bool success = 1;
+}
+
+message GetObjectRequest {
+  string index_id = 1;
+  uint64 object_id = 2;
+}
+
+message GetObjectResponse {
+  SpatialObject object = 1;
+  bool found = 2;
+}
+
+// --- Index Building ---
+
+message BuildRequest {
+  string index_id = 1;
+}
+
+message BuildResponse {
+  string message = 1;
+  double build_time_ms = 2;
+}
+
+message OptimizeRequest {
+  string index_id = 1;
+}
+
+message OptimizeResponse {
+  string message = 1;
+}
+
+// --- Spatial Queries ---
+
+message RangeQueryRequest {
+  string index_id = 1;
+  MBR range = 2;
+}
+
+message PointQueryRequest {
+  string index_id = 1;
+  double x = 2;
+  double y = 3;
+}
+
+message KNNQueryRequest {
+  string index_id = 1;
+  double x = 2;
+  double y = 3;
+  uint32 k = 4;
+}
+
+message QueryResponse {
+  repeated SpatialObject objects = 1;
+  uint64 count = 2;
+  double query_time_ms = 3;
+}
+
+// --- Adjacent Pages (Disk-Aware) ---
+
+message AdjacentPagesRequest {
+  string index_id = 1;
+  MBR region = 2;
+}
+
+message AdjacentPagesResponse {
+  repeated PageInfo pages = 1;
+  uint64 count = 2;
+  uint64 estimated_seeks = 3;
+}
+
+// --- Statistics ---
+
+message StatsRequest {
+  string index_id = 1;
+}
+
+message StatsResponse {
+  Stats stats = 1;
+}
+
+message CountRequest {
+  string index_id = 1;
+}
+
+message CountResponse {
+  uint64 count = 1;
+}
+
+message BoundsRequest {
+  string index_id = 1;
+}
+
+message BoundsResponse {
+  MBR bounds = 1;
+}
+
+// --- Persistence ---
+
+message SaveRequest {
+  string index_id = 1;
+  string path = 2;
+}
+
+message SaveResponse {
+  string message = 1;
+}
+
+message LoadIndexRequest {
+  string index_id = 1;
+  string path = 2;
+}
+
+message LoadIndexResponse {
+  string message = 1;
+}
+
+// =============================================================================
+// Service Definition
+// =============================================================================
+
+service UrbisService {
+  // Index Management
+  rpc CreateIndex(CreateIndexRequest) returns (CreateIndexResponse);
+  rpc DestroyIndex(DestroyIndexRequest) returns (DestroyIndexResponse);
+  rpc ListIndexes(ListIndexesRequest) returns (ListIndexesResponse);
+  
+  // Data Loading
+  rpc LoadGeoJSON(LoadGeoJSONRequest) returns (LoadResponse);
+  rpc LoadGeoJSONString(LoadGeoJSONStringRequest) returns (LoadResponse);
+  rpc LoadWKT(LoadWKTRequest) returns (LoadResponse);
+  
+  // Object Operations
+  rpc InsertPoint(InsertPointRequest) returns (InsertResponse);
+  rpc InsertLineString(InsertLineStringRequest) returns (InsertResponse);
+  rpc InsertPolygon(InsertPolygonRequest) returns (InsertResponse);
+  rpc Remove(RemoveRequest) returns (RemoveResponse);
+  rpc GetObject(GetObjectRequest) returns (GetObjectResponse);
+  
+  // Index Building
+  rpc Build(BuildRequest) returns (BuildResponse);
+  rpc Optimize(OptimizeRequest) returns (OptimizeResponse);
+  
+  // Spatial Queries
+  rpc QueryRange(RangeQueryRequest) returns (QueryResponse);
+  rpc QueryPoint(PointQueryRequest) returns (QueryResponse);
+  rpc QueryKNN(KNNQueryRequest) returns (QueryResponse);
+  rpc QueryAdjacent(RangeQueryRequest) returns (QueryResponse);
+  
+  // Disk-Aware Operations
+  rpc FindAdjacentPages(AdjacentPagesRequest) returns (AdjacentPagesResponse);
+  
+  // Statistics
+  rpc GetStats(StatsRequest) returns (StatsResponse);
+  rpc GetCount(CountRequest) returns (CountResponse);
+  rpc GetBounds(BoundsRequest) returns (BoundsResponse);
+  
+  // Persistence
+  rpc Save(SaveRequest) returns (SaveResponse);
+  rpc Load(LoadIndexRequest) returns (LoadIndexResponse);
+}
+

@@ -1,0 +1,50 @@
+# Compiled Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+output_binary
+
+# Debugging
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Gemini temporary directory
+.gemini/
+
+# Build directory
+build/
+lib/
+
+# Downloaded OSM data (large files)
+examples/data/*.json
+examples/data/*.geojson
