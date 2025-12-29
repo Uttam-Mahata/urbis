@@ -66,6 +66,15 @@ typedef struct {
     void *data;
 } KDPointData;
 
+/**
+ * @brief Configuration for parallel KD-tree construction
+ */
+typedef struct {
+    size_t num_threads;         /**< Number of threads (0 = auto-detect) */
+    size_t parallel_threshold;  /**< Min points for parallelization (default: 10000) */
+    size_t task_granularity;    /**< Min points per task (default: 1000) */
+} KDParallelConfig;
+
 /* ============================================================================
  * Error Codes
  * ============================================================================ */
@@ -103,6 +112,25 @@ int kdtree_insert(KDTree *tree, Point p, uint64_t object_id, void *data);
  * @param count Number of points
  */
 int kdtree_bulk_load(KDTree *tree, KDPointData *points, size_t count);
+
+/**
+ * @brief Get default parallel configuration
+ */
+KDParallelConfig kdtree_parallel_default_config(void);
+
+/**
+ * @brief Bulk load points using parallel construction
+ * @param tree The KD-tree
+ * @param points Array of point data to insert
+ * @param count Number of points
+ * @param config Parallel configuration (NULL for defaults)
+ * @return KD_OK on success
+ * 
+ * Uses multiple threads to build subtrees in parallel. For datasets larger
+ * than parallel_threshold, this can provide 4-8x speedup on multi-core systems.
+ */
+int kdtree_bulk_load_parallel(KDTree *tree, KDPointData *points, size_t count,
+                               const KDParallelConfig *config);
 
 /**
  * @brief Find the nearest neighbor to a query point

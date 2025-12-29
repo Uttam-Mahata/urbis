@@ -13,6 +13,7 @@
 #include "geometry.h"
 #include "page.h"
 #include "kdtree.h"
+#include "compression.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -73,6 +74,8 @@ typedef struct {
     AllocationStrategy strategy;      /**< Page allocation strategy */
     bool use_mmap;                    /**< Use memory-mapped I/O */
     bool sync_on_write;               /**< Sync to disk on every write */
+    bool use_compression;             /**< Enable page compression */
+    CompressionConfig compression;    /**< Compression settings */
 } DiskManagerConfig;
 
 /**
@@ -86,6 +89,9 @@ typedef struct {
     uint64_t seeks;                   /**< Estimated disk seeks */
     uint64_t bytes_read;              /**< Total bytes read */
     uint64_t bytes_written;           /**< Total bytes written */
+    uint64_t bytes_compressed;        /**< Bytes after compression */
+    uint64_t bytes_uncompressed;      /**< Bytes before compression */
+    double compression_ratio;         /**< Average compression ratio */
 } IOStats;
 
 /**

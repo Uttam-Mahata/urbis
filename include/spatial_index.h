@@ -15,6 +15,7 @@
 #include "quadtree.h"
 #include "page.h"
 #include "disk_manager.h"
+#include "lsm.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -44,6 +45,10 @@ typedef struct {
     bool build_quadtree;               /**< Build quadtree for adjacency */
     bool persist;                      /**< Persist to disk */
     char *data_path;                   /**< Path for data file */
+    bool enable_lsm;                   /**< Enable LSM-tree for incremental updates */
+    LSMConfig lsm_config;              /**< LSM configuration (if enabled) */
+    bool use_parallel_build;           /**< Use parallel KD-tree construction */
+    size_t parallel_threshold;         /**< Threshold for parallel build */
 } SpatialIndexConfig;
 
 /**
@@ -107,6 +112,7 @@ typedef struct {
     uint32_t next_block_id;            /**< Next block ID */
     bool is_built;                     /**< True if index is built */
     MBR bounds;                        /**< Overall bounds */
+    LSMTree *lsm;                      /**< LSM-tree for incremental updates */
 } SpatialIndex;
 
 /* ============================================================================

@@ -8,6 +8,8 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
+#include <pthread.h>
+#include <unistd.h>
 
 /* ============================================================================
  * Internal Helpers
@@ -246,6 +248,206 @@ int kdtree_bulk_load(KDTree *tree, KDPointData *points, size_t count) {
     
     /* Build balanced tree */
     tree->root = build_tree_recursive(points_copy, count, 0);
+    free(points_copy);
+    
+    if (!tree->root && count > 0) return KD_ERR_ALLOC;
+    
+    tree->size = count;
+    
+    /* Compute bounds */
+    for (size_t i = 0; i < count; i++) {
+        mbr_expand_point(&tree->bounds, &points[i].point);
+    }
+    
+    return KD_OK;
+}
+
+/* ============================================================================
+ * Parallel KD-Tree Construction
+ * ============================================================================ */
+
+/**
+ * @brief Task structure for parallel build
+ */
+typedef struct {
+    KDPointData *points;
+    size_t count;
+    int depth;
+    KDNode *result;
+    const KDParallelConfig *config;
+    int error;
+} KDBuildTask;
+
+/**
+ * @brief Thread pool for parallel build
+ */
+typedef struct {
+    pthread_t *threads;
+    size_t num_threads;
+    KDBuildTask *tasks;
+    size_t task_count;
+    size_t task_capacity;
+    size_t next_task;
+    pthread_mutex_t mutex;
+    pthread_cond_t work_available;
+    pthread_cond_t work_done;
+    size_t active_threads;
+    size_t completed_tasks;
+    bool shutdown;
+} KDThreadPool;
+
+static size_t get_num_cpus(void) {
+#ifdef _SC_NPROCESSORS_ONLN
+    long n = sysconf(_SC_NPROCESSORS_ONLN);
+    if (n > 0) return (size_t)n;
+#endif
+    return 4;  /* Default fallback */
+}
+
+KDParallelConfig kdtree_parallel_default_config(void) {
+    KDParallelConfig config = {
+        .num_threads = 0,           /* Auto-detect */
+        .parallel_threshold = 10000,
+        .task_granularity = 1000
+    };
+    return config;
+}
+
+/**
+ * @brief Task structure for parallel subtree building
+ */
+typedef struct {
+    KDPointData *points;
+    size_t count;
+    int depth;
+    const KDParallelConfig *config;
+    KDNode *result;
+} KDParallelTask;
+
+/* Forward declaration for recursive call */
+static KDNode* build_tree_parallel_recursive(KDPointData *points, size_t count, 
+                                              int depth, const KDParallelConfig *config);
+
+/**
+ * @brief Thread function for building subtree
+ */
+static void* build_subtree_thread(void *arg) {
+    KDParallelTask *task = (KDParallelTask *)arg;
+    task->result = build_tree_parallel_recursive(
+        task->points, task->count, task->depth, task->config);
+    return NULL;
+}
+
+/**
+ * @brief Parallel-aware recursive build
+ */
+static KDNode* build_tree_parallel_recursive(KDPointData *points, size_t count, 
+                                              int depth, const KDParallelConfig *config) {
+    if (count == 0) return NULL;
+    
+    int dim = depth % 2;
+    
+    /* Sort by current dimension */
+    if (dim == 0) {
+        qsort(points, count, sizeof(KDPointData), compare_by_x);
+    } else {
+        qsort(points, count, sizeof(KDPointData), compare_by_y);
+    }
+    
+    /* Find median */
+    size_t median = count / 2;
+    
+    /* Create node */
+    KDNode *node = kdnode_create(points[median].point, points[median].object_id,
+                                  points[median].data, dim);
+    if (!node) return NULL;
+    
+    size_t left_count = median;
+    size_t right_count = count - median - 1;
+    
+    /* Decide whether to parallelize - only at shallow depths to limit thread count */
+    bool use_parallel = (depth < 4 &&
+                         left_count >= config->task_granularity && 
+                         right_count >= config->task_granularity &&
+                         count >= config->parallel_threshold / (1 << depth));
+    
+    if (use_parallel) {
+        /* Build subtrees in parallel using fork-join */
+        KDParallelTask right_task = {
+            .points = points + median + 1,
+            .count = right_count,
+            .depth = depth + 1,
+            .config = config,
+            .result = NULL
+        };
+        
+        pthread_t right_thread;
+        int thread_created = pthread_create(&right_thread, NULL, build_subtree_thread, &right_task);
+        
+        /* Build left subtree in current thread */
+        node->left = build_tree_parallel_recursive(
+            points, left_count, depth + 1, config);
+        
+        /* Wait for right subtree */
+        if (thread_created == 0) {
+            pthread_join(right_thread, NULL);
+            node->right = right_task.result;
+        } else {
+            /* Fallback to sequential if thread creation failed */
+            node->right = build_tree_parallel_recursive(
+                points + median + 1, right_count, depth + 1, config);
+        }
+    } else {
+        /* Build subtrees sequentially */
+        node->left = build_tree_parallel_recursive(points, left_count, depth + 1, config);
+        node->right = build_tree_parallel_recursive(points + median + 1, right_count, 
+                                                     depth + 1, config);
+    }
+    
+    /* Update bounds and size */
+    kdnode_update_bounds(node);
+    
+    return node;
+}
+
+int kdtree_bulk_load_parallel(KDTree *tree, KDPointData *points, size_t count,
+                               const KDParallelConfig *config) {
+    if (!tree) return KD_ERR_NULL_PTR;
+    if (count == 0) return KD_OK;
+    if (!points) return KD_ERR_NULL_PTR;
+    
+    /* Use default config if not provided */
+    KDParallelConfig cfg;
+    if (config) {
+        cfg = *config;
+    } else {
+        cfg = kdtree_parallel_default_config();
+    }
+    
+    /* Auto-detect thread count */
+    if (cfg.num_threads == 0) {
+        cfg.num_threads = get_num_cpus();
+    }
+    
+    /* For small datasets, use sequential build */
+    if (count < cfg.parallel_threshold) {
+        return kdtree_bulk_load(tree, points, count);
+    }
+    
+    /* Free existing tree */
+    kdnode_free(tree->root);
+    tree->root = NULL;
+    tree->size = 0;
+    tree->bounds = mbr_empty();
+    
+    /* Make a copy of points array (will be modified during sort) */
+    KDPointData *points_copy = (KDPointData *)malloc(count * sizeof(KDPointData));
+    if (!points_copy) return KD_ERR_ALLOC;
+    memcpy(points_copy, points, count * sizeof(KDPointData));
+    
+    /* Build tree with parallel recursive function */
+    tree->root = build_tree_parallel_recursive(points_copy, count, 0, &cfg);
+    
     free(points_copy);
     
     if (!tree->root && count > 0) return KD_ERR_ALLOC;

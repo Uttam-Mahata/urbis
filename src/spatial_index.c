@@ -121,7 +121,11 @@ SpatialIndexConfig spatial_index_default_config(void) {
         .cache_size = DM_DEFAULT_CACHE_SIZE,
         .build_quadtree = true,
         .persist = false,
-        .data_path = NULL
+        .data_path = NULL,
+        .enable_lsm = false,
+        .lsm_config = {0},
+        .use_parallel_build = false,
+        .parallel_threshold = 10000
     };
     return config;
 }
@@ -177,6 +181,22 @@ int spatial_index_init(SpatialIndex *idx, const SpatialIndexConfig *config) {
     idx->bounds = mbr_empty();
     idx->is_built = false;
     idx->page_tree = NULL;
+    idx->lsm = NULL;
+    
+    /* Initialize LSM-tree if enabled */
+    if (idx->config.enable_lsm) {
+        LSMConfig lsm_cfg = idx->config.lsm_config;
+        if (lsm_cfg.memtable_size == 0) {
+            lsm_cfg = lsm_default_config();
+        }
+        idx->lsm = lsm_create(&lsm_cfg);
+        if (!idx->lsm) {
+            free(idx->blocks);
+            disk_manager_free(&idx->disk);
+            kdtree_free(&idx->block_tree);
+            return SI_ERR_ALLOC;
+        }
+    }
     
     return SI_OK;
 }
@@ -188,6 +208,10 @@ void spatial_index_free(SpatialIndex *idx) {
     
     if (idx->page_tree) {
         quadtree_destroy(idx->page_tree);
+    }
+    
+    if (idx->lsm) {
+        lsm_destroy(idx->lsm);
     }
     
     disk_manager_free(&idx->disk);
@@ -213,6 +237,16 @@ int spatial_index_insert(SpatialIndex *idx, SpatialObject *obj) {
     
     /* Update derived properties */
     spatial_object_update_derived(obj);
+    
+    /* If LSM is enabled, use incremental insert */
+    if (idx->lsm) {
+        int err = lsm_insert(idx->lsm, obj);
+        if (err != LSM_OK) return SI_ERR_ALLOC;
+        
+        /* Expand overall bounds */
+        mbr_expand_mbr(&idx->bounds, &obj->mbr);
+        return SI_OK;
+    }
     
     /* Find or create page for this object */
     Page *page = get_page_for_insert(idx, obj);
@@ -299,10 +333,18 @@ int spatial_index_build(SpatialIndex *idx) {
         }
     }
     
-    /* Build block tree */
+    /* Build block tree (optionally using parallel construction) */
     kdtree_free(&idx->block_tree);
     kdtree_init(&idx->block_tree);
-    int err = kdtree_bulk_load(&idx->block_tree, points, point_idx);
+    
+    int err;
+    if (idx->config.use_parallel_build && point_idx >= idx->config.parallel_threshold) {
+        KDParallelConfig parallel_cfg = kdtree_parallel_default_config();
+        parallel_cfg.parallel_threshold = idx->config.parallel_threshold;
+        err = kdtree_bulk_load_parallel(&idx->block_tree, points, point_idx, &parallel_cfg);
+    } else {
+        err = kdtree_bulk_load(&idx->block_tree, points, point_idx);
+    }
     free(points);
     
     if (err != KD_OK) return SI_ERR_ALLOC;
@@ -348,7 +390,26 @@ int spatial_index_query_range(SpatialIndex *idx, const MBR *range,
     
     spatial_result_clear(result);
     
-    /* Get pages intersecting range */
+    /* If LSM is enabled, query from LSM tree first */
+    if (idx->lsm) {
+        LSMQueryResult lsm_result;
+        lsm_result_init(&lsm_result, 64);
+        
+        int err = lsm_query_range(idx->lsm, range, &lsm_result);
+        if (err == LSM_OK) {
+            for (size_t i = 0; i < lsm_result.count; i++) {
+                /* Need to copy since LSM result owns the objects */
+                SpatialObject *obj_copy = (SpatialObject *)malloc(sizeof(SpatialObject));
+                if (obj_copy) {
+                    *obj_copy = lsm_result.objects[i];
+                    spatial_result_add(result, obj_copy);
+                }
+            }
+        }
+        lsm_result_free(&lsm_result);
+    }
+    
+    /* Also query from page pool (for non-LSM data) */
     Page **pages = NULL;
     size_t page_count = 0;
     

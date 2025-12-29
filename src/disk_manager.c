@@ -4,6 +4,7 @@
  */
 
 #include "disk_manager.h"
+#include "compression.h"
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -15,6 +16,9 @@
 #ifdef __linux__
 #include <sys/mman.h>
 #endif
+
+/* Maximum compressed page buffer size */
+#define MAX_COMPRESSED_SIZE (PAGE_SIZE * 2)
 
 /* ============================================================================
  * Internal Helpers
@@ -35,7 +39,7 @@ static size_t page_file_offset(const DiskManager *dm, uint32_t page_id) {
 }
 
 /**
- * @brief Read page from disk
+ * @brief Read page from disk (with optional decompression)
  */
 static int read_page_from_disk(DiskManager *dm, Page *page) {
     if (!dm || !page || !dm->data_file) return DM_ERR_NULL_PTR;
@@ -46,26 +50,50 @@ static int read_page_from_disk(DiskManager *dm, Page *page) {
         return DM_ERR_IO;
     }
     
-    uint8_t buffer[PAGE_SIZE];
-    if (fread(buffer, 1, dm->config.page_size, dm->data_file) != dm->config.page_size) {
+    uint8_t buffer[MAX_COMPRESSED_SIZE];
+    size_t read_size = dm->config.page_size;
+    
+    /* If compression is enabled, read the full slot (may contain compressed data) */
+    if (dm->config.use_compression) {
+        read_size = MAX_COMPRESSED_SIZE;
+    }
+    
+    size_t bytes_read = fread(buffer, 1, read_size, dm->data_file);
+    if (bytes_read == 0) {
         if (!feof(dm->data_file)) {
             return DM_ERR_IO;
         }
         /* New page - initialize empty */
         memset(buffer, 0, sizeof(buffer));
+        bytes_read = dm->config.page_size;
     }
     
-    int err = page_deserialize(page, buffer, dm->config.page_size);
-    if (err != PAGE_OK) return DM_ERR_CORRUPT;
+    dm->stats.bytes_read += bytes_read;
+    
+    /* Check if data is compressed and decompress */
+    if (dm->config.use_compression && is_compressed(buffer, bytes_read)) {
+        uint8_t decompressed[PAGE_SIZE];
+        size_t decompressed_size;
+        
+        int err = decompress_data(buffer, bytes_read, decompressed, PAGE_SIZE, &decompressed_size);
+        if (err != COMPRESS_OK) {
+            return DM_ERR_CORRUPT;
+        }
+        
+        err = page_deserialize(page, decompressed, decompressed_size);
+        if (err != PAGE_OK) return DM_ERR_CORRUPT;
+    } else {
+        int err = page_deserialize(page, buffer, dm->config.page_size);
+        if (err != PAGE_OK) return DM_ERR_CORRUPT;
+    }
     
     dm->stats.pages_read++;
-    dm->stats.bytes_read += dm->config.page_size;
     
     return DM_OK;
 }
 
 /**
- * @brief Write page to disk
+ * @brief Write page to disk (with optional compression)
  */
 static int write_page_to_disk(DiskManager *dm, const Page *page) {
     if (!dm || !page || !dm->data_file) return DM_ERR_NULL_PTR;
@@ -80,8 +108,43 @@ static int write_page_to_disk(DiskManager *dm, const Page *page) {
     int err = page_serialize(page, buffer, dm->config.page_size);
     if (err != PAGE_OK) return DM_ERR_IO;
     
-    if (fwrite(buffer, 1, dm->config.page_size, dm->data_file) != dm->config.page_size) {
+    size_t write_size = dm->config.page_size;
+    uint8_t *write_buffer = buffer;
+    uint8_t compressed[MAX_COMPRESSED_SIZE];
+    
+    /* Compress if enabled */
+    if (dm->config.use_compression) {
+        size_t compressed_size;
+        err = compress_data(buffer, dm->config.page_size, compressed, 
+                           MAX_COMPRESSED_SIZE, &compressed_size, 
+                           &dm->config.compression);
+        
+        if (err == COMPRESS_OK && compressed_size > 0) {
+            write_buffer = compressed;
+            write_size = compressed_size;
+            
+            /* Track compression stats */
+            dm->stats.bytes_uncompressed += dm->config.page_size;
+            dm->stats.bytes_compressed += compressed_size;
+            if (dm->stats.bytes_uncompressed > 0) {
+                dm->stats.compression_ratio = (double)dm->stats.bytes_compressed / 
+                                              (double)dm->stats.bytes_uncompressed;
+            }
+        }
+        /* If compression failed or ratio was poor, write uncompressed */
+    }
+    
+    if (fwrite(write_buffer, 1, write_size, dm->data_file) != write_size) {
         return DM_ERR_IO;
+    }
+    
+    /* Pad to page size if compressed data is smaller */
+    if (write_size < dm->config.page_size) {
+        uint8_t padding[PAGE_SIZE] = {0};
+        size_t pad_size = dm->config.page_size - write_size;
+        if (fwrite(padding, 1, pad_size, dm->data_file) != pad_size) {
+            return DM_ERR_IO;
+        }
     }
     
     if (dm->config.sync_on_write) {
@@ -89,7 +152,7 @@ static int write_page_to_disk(DiskManager *dm, const Page *page) {
     }
     
     dm->stats.pages_written++;
-    dm->stats.bytes_written += dm->config.page_size;
+    dm->stats.bytes_written += write_size;
     
     return DM_OK;
 }
@@ -173,7 +236,14 @@ DiskManagerConfig disk_manager_default_config(void) {
         .pages_per_track = PAGES_PER_TRACK,
         .strategy = ALLOC_BEST_FIT,
         .use_mmap = false,
-        .sync_on_write = false
+        .sync_on_write = false,
+        .use_compression = false,
+        .compression = {
+            .type = COMPRESS_LZ4,
+            .level = COMPRESS_LEVEL_DEFAULT,
+            .min_size = 64,
+            .min_ratio = 0.95
+        }
     };
     return config;
 }
@@ -693,6 +763,7 @@ void disk_manager_print_stats(const DiskManager *dm, FILE *out) {
     fprintf(out, "File: %s\n", dm->file_path ? dm->file_path : "(none)");
     fprintf(out, "Open: %s\n", dm->is_open ? "yes" : "no");
     fprintf(out, "Dirty: %s\n", dm->is_dirty ? "yes" : "no");
+    fprintf(out, "Compression: %s\n", dm->config.use_compression ? "enabled" : "disabled");
     fprintf(out, "\n");
     fprintf(out, "Pages: %u\n", dm->header.page_count);
     fprintf(out, "Tracks: %u\n", dm->header.track_count);
@@ -710,6 +781,15 @@ void disk_manager_print_stats(const DiskManager *dm, FILE *out) {
         double hit_rate = 100.0 * dm->stats.cache_hits / 
                           (dm->stats.cache_hits + dm->stats.cache_misses);
         fprintf(out, "  Cache hit rate: %.1f%%\n", hit_rate);
+    }
+    
+    if (dm->config.use_compression && dm->stats.bytes_uncompressed > 0) {
+        fprintf(out, "\nCompression Statistics:\n");
+        fprintf(out, "  Uncompressed: %lu bytes\n", (unsigned long)dm->stats.bytes_uncompressed);
+        fprintf(out, "  Compressed: %lu bytes\n", (unsigned long)dm->stats.bytes_compressed);
+        fprintf(out, "  Ratio: %.2f (%.1f%% reduction)\n", 
+                dm->stats.compression_ratio,
+                (1.0 - dm->stats.compression_ratio) * 100.0);
     }
 }
 
