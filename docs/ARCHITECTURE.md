@@ -19,7 +19,7 @@ graph TD
     User[User Application] --> API[Urbis Public API]
 
     subgraph "Input Processing"
-        API --> Parser[Parser (GeoJSON/WKT)]
+        API --> Parser["Parser (GeoJSON/WKT)"]
         Parser --> Geometry[Geometry Primitives]
     end
 
