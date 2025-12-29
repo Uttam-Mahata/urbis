@@ -292,6 +292,162 @@ message LoadIndexResponse {
 }
 
 // =============================================================================
+// Advanced Spatial Operations
+// =============================================================================
+
+// --- Buffer ---
+
+message BufferRequest {
+  string index_id = 1;
+  uint64 object_id = 2;
+  double distance = 3;
+  int32 segments = 4;  // 0 for default
+}
+
+message BufferPointRequest {
+  double x = 1;
+  double y = 2;
+  double distance = 3;
+  int32 segments = 4;
+}
+
+message BufferResponse {
+  Polygon polygon = 1;
+}
+
+// --- Spatial Predicates ---
+
+message IntersectsRequest {
+  string index_id = 1;
+  uint64 id_a = 2;
+  uint64 id_b = 3;
+}
+
+message ContainsRequest {
+  string index_id = 1;
+  uint64 container_id = 2;
+  uint64 contained_id = 3;
+}
+
+message DistanceRequest {
+  string index_id = 1;
+  uint64 id_a = 2;
+  uint64 id_b = 3;
+}
+
+message PredicateResponse {
+  bool result = 1;
+}
+
+message DistanceResponse {
+  double distance = 1;
+}
+
+// --- Spatial Join ---
+
+enum JoinType {
+  JOIN_INTERSECTS = 0;
+  JOIN_WITHIN = 1;
+  JOIN_CONTAINS = 2;
+  JOIN_NEAREST = 3;
+}
+
+message SpatialJoinRequest {
+  string index_a = 1;
+  string index_b = 2;
+  JoinType join_type = 3;
+  double distance = 4;  // For WITHIN joins
+}
+
+message JoinPair {
+  uint64 id_a = 1;
+  uint64 id_b = 2;
+  double distance = 3;
+}
+
+message SpatialJoinResponse {
+  repeated JoinPair pairs = 1;
+  uint64 count = 2;
+  double query_time_ms = 3;
+}
+
+// --- Grid Aggregation ---
+
+enum AggregationType {
+  AGG_COUNT = 0;
+  AGG_SUM = 1;
+  AGG_AVG = 2;
+  AGG_MIN = 3;
+  AGG_MAX = 4;
+}
+
+message GridAggregationRequest {
+  string index_id = 1;
+  MBR bounds = 2;        // Optional, NULL for full extent
+  double cell_size = 3;
+  AggregationType agg_type = 4;
+}
+
+message GridCell {
+  double value = 1;
+  uint64 count = 2;
+  MBR bounds = 3;
+}
+
+message GridAggregationResponse {
+  repeated GridCell cells = 1;
+  uint64 rows = 2;
+  uint64 cols = 3;
+  MBR bounds = 4;
+  double cell_size = 5;
+}
+
+// --- Voronoi/Delaunay ---
+
+message VoronoiRequest {
+  string index_id = 1;
+  MBR bounds = 2;  // Optional clipping bounds
+}
+
+message VoronoiCell {
+  Polygon cell = 1;
+  uint64 point_id = 2;
+  Point site = 3;
+}
+
+message VoronoiResponse {
+  repeated VoronoiCell cells = 1;
+  uint64 count = 2;
+}
+
+message DelaunayRequest {
+  string index_id = 1;
+}
+
+message Triangle {
+  uint64 v1 = 1;
+  uint64 v2 = 2;
+  uint64 v3 = 3;
+  Point circumcenter = 4;
+  double circumradius = 5;
+}
+
+message DelaunayResponse {
+  repeated Triangle triangles = 1;
+  uint64 count = 2;
+}
+
+// --- Convex Hull ---
+
+message ConvexHullRequest {
+  string index_id = 1;
+}
+
+message ConvexHullResponse {
+  Polygon hull = 1;
+}
+
+// =============================================================================
 // Service Definition
 // =============================================================================
 
@@ -334,5 +490,17 @@ service UrbisService {
   // Persistence
   rpc Save(SaveRequest) returns (SaveResponse);
   rpc Load(LoadIndexRequest) returns (LoadIndexResponse);
+  
+  // Advanced Spatial Operations
+  rpc Buffer(BufferRequest) returns (BufferResponse);
+  rpc BufferPoint(BufferPointRequest) returns (BufferResponse);
+  rpc Intersects(IntersectsRequest) returns (PredicateResponse);
+  rpc Contains(ContainsRequest) returns (PredicateResponse);
+  rpc Distance(DistanceRequest) returns (DistanceResponse);
+  rpc SpatialJoin(SpatialJoinRequest) returns (SpatialJoinResponse);
+  rpc AggregateGrid(GridAggregationRequest) returns (GridAggregationResponse);
+  rpc Voronoi(VoronoiRequest) returns (VoronoiResponse);
+  rpc Delaunay(DelaunayRequest) returns (DelaunayResponse);
+  rpc ConvexHull(ConvexHullRequest) returns (ConvexHullResponse);
 }
 

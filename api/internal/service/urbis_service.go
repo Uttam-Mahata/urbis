@@ -646,3 +646,187 @@ func convertToPbObjects(objs []*urbis.SpatialObject) []*pb.SpatialObject {
 	return result
 }
 
+// =============================================================================
+// Advanced Spatial Operations
+// =============================================================================
+
+// Buffer creates a buffer zone around an object
+func (s *UrbisServer) Buffer(ctx context.Context, req *pb.BufferRequest) (*pb.BufferResponse, error) {
+	idx, err := s.getIndex(req.IndexId)
+	if err != nil {
+		return nil, err
+	}
+	
+	points, err := idx.Buffer(req.ObjectId, req.Distance, int(req.Segments))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "buffer failed: %v", err)
+	}
+	
+	pbPoints := make([]*pb.Point, len(points))
+	for i, p := range points {
+		pbPoints[i] = &pb.Point{X: p.X, Y: p.Y}
+	}
+	
+	return &pb.BufferResponse{
+		Polygon: &pb.Polygon{Exterior: pbPoints},
+	}, nil
+}
+
+// BufferPoint creates a buffer zone around a point
+func (s *UrbisServer) BufferPoint(ctx context.Context, req *pb.BufferPointRequest) (*pb.BufferResponse, error) {
+	points, err := urbis.BufferPoint(req.X, req.Y, req.Distance, int(req.Segments))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "buffer failed: %v", err)
+	}
+	
+	pbPoints := make([]*pb.Point, len(points))
+	for i, p := range points {
+		pbPoints[i] = &pb.Point{X: p.X, Y: p.Y}
+	}
+	
+	return &pb.BufferResponse{
+		Polygon: &pb.Polygon{Exterior: pbPoints},
+	}, nil
+}
+
+// Intersects checks if two objects intersect
+func (s *UrbisServer) Intersects(ctx context.Context, req *pb.IntersectsRequest) (*pb.PredicateResponse, error) {
+	idx, err := s.getIndex(req.IndexId)
+	if err != nil {
+		return nil, err
+	}
+	
+	result := idx.Intersects(req.IdA, req.IdB)
+	
+	return &pb.PredicateResponse{Result: result}, nil
+}
+
+// Contains checks if object A contains object B
+func (s *UrbisServer) Contains(ctx context.Context, req *pb.ContainsRequest) (*pb.PredicateResponse, error) {
+	idx, err := s.getIndex(req.IndexId)
+	if err != nil {
+		return nil, err
+	}
+	
+	result := idx.Contains(req.ContainerId, req.ContainedId)
+	
+	return &pb.PredicateResponse{Result: result}, nil
+}
+
+// Distance calculates distance between two objects
+func (s *UrbisServer) Distance(ctx context.Context, req *pb.DistanceRequest) (*pb.DistanceResponse, error) {
+	idx, err := s.getIndex(req.IndexId)
+	if err != nil {
+		return nil, err
+	}
+	
+	dist := idx.Distance(req.IdA, req.IdB)
+	
+	return &pb.DistanceResponse{Distance: dist}, nil
+}
+
+// SpatialJoin performs a spatial join between two indexes
+func (s *UrbisServer) SpatialJoin(ctx context.Context, req *pb.SpatialJoinRequest) (*pb.SpatialJoinResponse, error) {
+	idxA, err := s.getIndex(req.IndexA)
+	if err != nil {
+		return nil, err
+	}
+	
+	idxB, err := s.getIndex(req.IndexB)
+	if err != nil {
+		return nil, err
+	}
+	
+	start := time.Now()
+	
+	result, err := urbis.SpatialJoin(idxA, idxB, urbis.JoinType(req.JoinType), req.Distance)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "spatial join failed: %v", err)
+	}
+	
+	elapsed := time.Since(start)
+	
+	pairs := make([]*pb.JoinPair, len(result.Pairs))
+	for i, p := range result.Pairs {
+		pairs[i] = &pb.JoinPair{
+			IdA:      p.IDA,
+			IdB:      p.IDB,
+			Distance: p.Distance,
+		}
+	}
+	
+	return &pb.SpatialJoinResponse{
+		Pairs:       pairs,
+		Count:       result.Count,
+		QueryTimeMs: float64(elapsed.Microseconds()) / 1000.0,
+	}, nil
+}
+
+// AggregateGrid performs grid-based spatial aggregation
+func (s *UrbisServer) AggregateGrid(ctx context.Context, req *pb.GridAggregationRequest) (*pb.GridAggregationResponse, error) {
+	idx, err := s.getIndex(req.IndexId)
+	if err != nil {
+		return nil, err
+	}
+	
+	var bounds *urbis.MBR
+	if req.Bounds != nil {
+		bounds = &urbis.MBR{
+			MinX: req.Bounds.MinX,
+			MinY: req.Bounds.MinY,
+			MaxX: req.Bounds.MaxX,
+			MaxY: req.Bounds.MaxY,
+		}
+	}
+	
+	result, err := idx.AggregateGrid(bounds, req.CellSize, urbis.AggType(req.AggType))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "aggregation failed: %v", err)
+	}
+	
+	cells := make([]*pb.GridCell, len(result.Cells))
+	for i, c := range result.Cells {
+		cells[i] = &pb.GridCell{
+			Value: c.Value,
+			Count: c.Count,
+			Bounds: &pb.MBR{
+				MinX: c.Bounds.MinX,
+				MinY: c.Bounds.MinY,
+				MaxX: c.Bounds.MaxX,
+				MaxY: c.Bounds.MaxY,
+			},
+		}
+	}
+	
+	return &pb.GridAggregationResponse{
+		Cells:    cells,
+		Rows:     result.Rows,
+		Cols:     result.Cols,
+		CellSize: result.CellSize,
+		Bounds: &pb.MBR{
+			MinX: result.Bounds.MinX,
+			MinY: result.Bounds.MinY,
+			MaxX: result.Bounds.MaxX,
+			MaxY: result.Bounds.MaxY,
+		},
+	}, nil
+}
+
+// Voronoi creates a Voronoi diagram (placeholder)
+func (s *UrbisServer) Voronoi(ctx context.Context, req *pb.VoronoiRequest) (*pb.VoronoiResponse, error) {
+	// TODO: Implement Voronoi CGO binding
+	return nil, status.Error(codes.Unimplemented, "Voronoi not yet implemented in gRPC")
+}
+
+// Delaunay creates a Delaunay triangulation (placeholder)
+func (s *UrbisServer) Delaunay(ctx context.Context, req *pb.DelaunayRequest) (*pb.DelaunayResponse, error) {
+	// TODO: Implement Delaunay CGO binding
+	return nil, status.Error(codes.Unimplemented, "Delaunay not yet implemented in gRPC")
+}
+
+// ConvexHull computes convex hull (placeholder)
+func (s *UrbisServer) ConvexHull(ctx context.Context, req *pb.ConvexHullRequest) (*pb.ConvexHullResponse, error) {
+	// TODO: Implement ConvexHull CGO binding
+	return nil, status.Error(codes.Unimplemented, "ConvexHull not yet implemented in gRPC")
+}
+

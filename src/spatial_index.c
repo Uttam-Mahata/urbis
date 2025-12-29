@@ -762,3 +762,268 @@ void adjacent_result_free(AdjacentPagesResult *result) {
     memset(result, 0, sizeof(AdjacentPagesResult));
 }
 
+/* ============================================================================
+ * Spatial Join Operations
+ * ============================================================================ */
+
+SpatialJoinResult* spatial_index_join(SpatialIndex *idx_a, SpatialIndex *idx_b,
+                                       SpatialJoinType join_type, double distance) {
+    if (!idx_a || !idx_b) return NULL;
+    
+    SpatialJoinResult *result = join_result_create(1024);
+    if (!result) return NULL;
+    
+    /* Iterate through all objects in idx_a */
+    for (size_t i = 0; i < idx_a->disk.pool.page_count; i++) {
+        Page *page_a = idx_a->disk.pool.pages[i];
+        for (size_t j = 0; j < page_a->header.object_count; j++) {
+            SpatialObject *obj_a = &page_a->objects[j];
+            
+            /* Query idx_b for potential matches */
+            MBR search_region = obj_a->mbr;
+            if (join_type == JOIN_WITHIN) {
+                /* Expand search region by distance */
+                search_region.min_x -= distance;
+                search_region.min_y -= distance;
+                search_region.max_x += distance;
+                search_region.max_y += distance;
+            }
+            
+            /* Search in idx_b */
+            for (size_t k = 0; k < idx_b->disk.pool.page_count; k++) {
+                Page *page_b = idx_b->disk.pool.pages[k];
+                
+                /* Quick MBR check */
+                if (!mbr_intersects(&search_region, &page_b->header.extent)) {
+                    continue;
+                }
+                
+                for (size_t l = 0; l < page_b->header.object_count; l++) {
+                    SpatialObject *obj_b = &page_b->objects[l];
+                    
+                    bool match = false;
+                    double dist = 0;
+                    
+                    switch (join_type) {
+                        case JOIN_INTERSECTS:
+                            match = spatial_intersects(obj_a, obj_b);
+                            break;
+                            
+                        case JOIN_WITHIN:
+                            dist = spatial_distance(obj_a, obj_b);
+                            match = (dist <= distance);
+                            break;
+                            
+                        case JOIN_CONTAINS:
+                            match = spatial_contains(obj_a, obj_b);
+                            break;
+                            
+                        case JOIN_NEAREST:
+                            /* For nearest, we'll add all and sort later */
+                            dist = spatial_distance(obj_a, obj_b);
+                            match = true;
+                            break;
+                    }
+                    
+                    if (match) {
+                        join_result_add(result, obj_a->id, obj_b->id, dist);
+                    }
+                }
+            }
+        }
+    }
+    
+    return result;
+}
+
+SpatialJoinResult* spatial_index_self_join(SpatialIndex *idx,
+                                            SpatialJoinType join_type, double distance) {
+    if (!idx) return NULL;
+    
+    SpatialJoinResult *result = join_result_create(1024);
+    if (!result) return NULL;
+    
+    /* Iterate through all pairs of objects */
+    for (size_t i = 0; i < idx->disk.pool.page_count; i++) {
+        Page *page_i = idx->disk.pool.pages[i];
+        
+        for (size_t j = 0; j < page_i->header.object_count; j++) {
+            SpatialObject *obj_a = &page_i->objects[j];
+            
+            /* Search region */
+            MBR search_region = obj_a->mbr;
+            if (join_type == JOIN_WITHIN) {
+                search_region.min_x -= distance;
+                search_region.min_y -= distance;
+                search_region.max_x += distance;
+                search_region.max_y += distance;
+            }
+            
+            /* Compare with objects in same and later pages */
+            for (size_t k = i; k < idx->disk.pool.page_count; k++) {
+                Page *page_k = idx->disk.pool.pages[k];
+                
+                if (!mbr_intersects(&search_region, &page_k->header.extent)) {
+                    continue;
+                }
+                
+                size_t start_l = (k == i) ? j + 1 : 0;
+                
+                for (size_t l = start_l; l < page_k->header.object_count; l++) {
+                    SpatialObject *obj_b = &page_k->objects[l];
+                    
+                    bool match = false;
+                    double dist = 0;
+                    
+                    switch (join_type) {
+                        case JOIN_INTERSECTS:
+                            match = spatial_intersects(obj_a, obj_b);
+                            break;
+                            
+                        case JOIN_WITHIN:
+                            dist = spatial_distance(obj_a, obj_b);
+                            match = (dist <= distance);
+                            break;
+                            
+                        case JOIN_CONTAINS:
+                            match = spatial_contains(obj_a, obj_b);
+                            break;
+                            
+                        case JOIN_NEAREST:
+                            dist = spatial_distance(obj_a, obj_b);
+                            match = true;
+                            break;
+                    }
+                    
+                    if (match) {
+                        join_result_add(result, obj_a->id, obj_b->id, dist);
+                    }
+                }
+            }
+        }
+    }
+    
+    return result;
+}
+
+/* ============================================================================
+ * Spatial Aggregation Operations
+ * ============================================================================ */
+
+GridAggregation* spatial_index_aggregate_grid(SpatialIndex *idx, const MBR *bounds,
+                                               double cell_size, AggregationType agg_type) {
+    if (!idx || cell_size <= 0) return NULL;
+    
+    /* Use provided bounds or index bounds */
+    MBR agg_bounds = bounds ? *bounds : idx->bounds;
+    
+    GridAggregation *grid = grid_aggregation_create(&agg_bounds, cell_size);
+    if (!grid) return NULL;
+    
+    /* Iterate through all objects */
+    for (size_t i = 0; i < idx->disk.pool.page_count; i++) {
+        Page *page = idx->disk.pool.pages[i];
+        
+        for (size_t j = 0; j < page->header.object_count; j++) {
+            SpatialObject *obj = &page->objects[j];
+            
+            /* Add to grid with value 1.0 for counting */
+            double value = 1.0;
+            grid_aggregation_add(grid, obj, value, agg_type);
+        }
+    }
+    
+    /* Finalize aggregation */
+    grid_aggregation_finalize(grid, agg_type);
+    
+    return grid;
+}
+
+RegionAggregation* spatial_index_aggregate_regions(SpatialIndex *data_idx,
+                                                    SpatialIndex *region_idx,
+                                                    AggregationType agg_type) {
+    if (!data_idx || !region_idx) return NULL;
+    
+    /* Count region polygons */
+    size_t region_count = 0;
+    for (size_t i = 0; i < region_idx->disk.pool.page_count; i++) {
+        Page *page = region_idx->disk.pool.pages[i];
+        for (size_t j = 0; j < page->header.object_count; j++) {
+            if (page->objects[j].type == GEOM_POLYGON) {
+                region_count++;
+            }
+        }
+    }
+    
+    if (region_count == 0) return NULL;
+    
+    /* Allocate result */
+    RegionAggregation *result = malloc(sizeof(RegionAggregation));
+    if (!result) return NULL;
+    
+    result->regions = calloc(region_count, sizeof(RegionAggregate));
+    if (!result->regions) {
+        free(result);
+        return NULL;
+    }
+    result->count = region_count;
+    
+    /* Initialize regions */
+    size_t idx_region = 0;
+    for (size_t i = 0; i < region_idx->disk.pool.page_count; i++) {
+        Page *page = region_idx->disk.pool.pages[i];
+        for (size_t j = 0; j < page->header.object_count; j++) {
+            SpatialObject *region = &page->objects[j];
+            if (region->type == GEOM_POLYGON) {
+                result->regions[idx_region].region_id = region->id;
+                result->regions[idx_region].value = 0;
+                result->regions[idx_region].count = 0;
+                idx_region++;
+            }
+        }
+    }
+    
+    /* Count objects in each region */
+    for (size_t i = 0; i < data_idx->disk.pool.page_count; i++) {
+        Page *page = data_idx->disk.pool.pages[i];
+        
+        for (size_t j = 0; j < page->header.object_count; j++) {
+            SpatialObject *obj = &page->objects[j];
+            
+            /* Find which region contains this object */
+            idx_region = 0;
+            for (size_t k = 0; k < region_idx->disk.pool.page_count; k++) {
+                Page *rpage = region_idx->disk.pool.pages[k];
+                for (size_t l = 0; l < rpage->header.object_count; l++) {
+                    SpatialObject *region = &rpage->objects[l];
+                    if (region->type == GEOM_POLYGON) {
+                        if (point_in_polygon(&obj->centroid, &region->geom.polygon)) {
+                            result->regions[idx_region].count++;
+                            result->regions[idx_region].value += 1.0;
+                        }
+                        idx_region++;
+                    }
+                }
+            }
+        }
+    }
+    
+    /* Finalize based on aggregation type */
+    for (size_t i = 0; i < result->count; i++) {
+        switch (agg_type) {
+            case AGG_COUNT:
+                result->regions[i].value = (double)result->regions[i].count;
+                break;
+            case AGG_AVG:
+                if (result->regions[i].count > 0) {
+                    result->regions[i].value /= result->regions[i].count;
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    
+    return result;
+}
+

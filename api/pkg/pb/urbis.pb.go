@@ -71,6 +71,113 @@ func (GeomType) EnumDescriptor() ([]byte, []int) {
 	return file_urbis_proto_rawDescGZIP(), []int{0}
 }
 
+type JoinType int32
+
+const (
+	JoinType_JOIN_INTERSECTS JoinType = 0
+	JoinType_JOIN_WITHIN     JoinType = 1
+	JoinType_JOIN_CONTAINS   JoinType = 2
+	JoinType_JOIN_NEAREST    JoinType = 3
+)
+
+// Enum value maps for JoinType.
+var (
+	JoinType_name = map[int32]string{
+		0: "JOIN_INTERSECTS",
+		1: "JOIN_WITHIN",
+		2: "JOIN_CONTAINS",
+		3: "JOIN_NEAREST",
+	}
+	JoinType_value = map[string]int32{
+		"JOIN_INTERSECTS": 0,
+		"JOIN_WITHIN":     1,
+		"JOIN_CONTAINS":   2,
+		"JOIN_NEAREST":    3,
+	}
+)
+
+func (x JoinType) Enum() *JoinType {
+	p := new(JoinType)
+	*p = x
+	return p
+}
+
+func (x JoinType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (JoinType) Descriptor() protoreflect.EnumDescriptor {
+	return file_urbis_proto_enumTypes[1].Descriptor()
+}
+
+func (JoinType) Type() protoreflect.EnumType {
+	return &file_urbis_proto_enumTypes[1]
+}
+
+func (x JoinType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use JoinType.Descriptor instead.
+func (JoinType) EnumDescriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{1}
+}
+
+type AggregationType int32
+
+const (
+	AggregationType_AGG_COUNT AggregationType = 0
+	AggregationType_AGG_SUM   AggregationType = 1
+	AggregationType_AGG_AVG   AggregationType = 2
+	AggregationType_AGG_MIN   AggregationType = 3
+	AggregationType_AGG_MAX   AggregationType = 4
+)
+
+// Enum value maps for AggregationType.
+var (
+	AggregationType_name = map[int32]string{
+		0: "AGG_COUNT",
+		1: "AGG_SUM",
+		2: "AGG_AVG",
+		3: "AGG_MIN",
+		4: "AGG_MAX",
+	}
+	AggregationType_value = map[string]int32{
+		"AGG_COUNT": 0,
+		"AGG_SUM":   1,
+		"AGG_AVG":   2,
+		"AGG_MIN":   3,
+		"AGG_MAX":   4,
+	}
+)
+
+func (x AggregationType) Enum() *AggregationType {
+	p := new(AggregationType)
+	*p = x
+	return p
+}
+
+func (x AggregationType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (AggregationType) Descriptor() protoreflect.EnumDescriptor {
+	return file_urbis_proto_enumTypes[2].Descriptor()
+}
+
+func (AggregationType) Type() protoreflect.EnumType {
+	return &file_urbis_proto_enumTypes[2]
+}
+
+func (x AggregationType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use AggregationType.Descriptor instead.
+func (AggregationType) EnumDescriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{2}
+}
+
 // 2D Point
 type Point struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -2600,6 +2707,1270 @@ func (x *LoadIndexResponse) GetMessage() string {
 	return ""
 }
 
+type BufferRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IndexId       string                 `protobuf:"bytes,1,opt,name=index_id,json=indexId,proto3" json:"index_id,omitempty"`
+	ObjectId      uint64                 `protobuf:"varint,2,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
+	Distance      float64                `protobuf:"fixed64,3,opt,name=distance,proto3" json:"distance,omitempty"`
+	Segments      int32                  `protobuf:"varint,4,opt,name=segments,proto3" json:"segments,omitempty"` // 0 for default
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BufferRequest) Reset() {
+	*x = BufferRequest{}
+	mi := &file_urbis_proto_msgTypes[47]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BufferRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BufferRequest) ProtoMessage() {}
+
+func (x *BufferRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[47]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BufferRequest.ProtoReflect.Descriptor instead.
+func (*BufferRequest) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{47}
+}
+
+func (x *BufferRequest) GetIndexId() string {
+	if x != nil {
+		return x.IndexId
+	}
+	return ""
+}
+
+func (x *BufferRequest) GetObjectId() uint64 {
+	if x != nil {
+		return x.ObjectId
+	}
+	return 0
+}
+
+func (x *BufferRequest) GetDistance() float64 {
+	if x != nil {
+		return x.Distance
+	}
+	return 0
+}
+
+func (x *BufferRequest) GetSegments() int32 {
+	if x != nil {
+		return x.Segments
+	}
+	return 0
+}
+
+type BufferPointRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	X             float64                `protobuf:"fixed64,1,opt,name=x,proto3" json:"x,omitempty"`
+	Y             float64                `protobuf:"fixed64,2,opt,name=y,proto3" json:"y,omitempty"`
+	Distance      float64                `protobuf:"fixed64,3,opt,name=distance,proto3" json:"distance,omitempty"`
+	Segments      int32                  `protobuf:"varint,4,opt,name=segments,proto3" json:"segments,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BufferPointRequest) Reset() {
+	*x = BufferPointRequest{}
+	mi := &file_urbis_proto_msgTypes[48]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BufferPointRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BufferPointRequest) ProtoMessage() {}
+
+func (x *BufferPointRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[48]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BufferPointRequest.ProtoReflect.Descriptor instead.
+func (*BufferPointRequest) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{48}
+}
+
+func (x *BufferPointRequest) GetX() float64 {
+	if x != nil {
+		return x.X
+	}
+	return 0
+}
+
+func (x *BufferPointRequest) GetY() float64 {
+	if x != nil {
+		return x.Y
+	}
+	return 0
+}
+
+func (x *BufferPointRequest) GetDistance() float64 {
+	if x != nil {
+		return x.Distance
+	}
+	return 0
+}
+
+func (x *BufferPointRequest) GetSegments() int32 {
+	if x != nil {
+		return x.Segments
+	}
+	return 0
+}
+
+type BufferResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Polygon       *Polygon               `protobuf:"bytes,1,opt,name=polygon,proto3" json:"polygon,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BufferResponse) Reset() {
+	*x = BufferResponse{}
+	mi := &file_urbis_proto_msgTypes[49]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BufferResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BufferResponse) ProtoMessage() {}
+
+func (x *BufferResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[49]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BufferResponse.ProtoReflect.Descriptor instead.
+func (*BufferResponse) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{49}
+}
+
+func (x *BufferResponse) GetPolygon() *Polygon {
+	if x != nil {
+		return x.Polygon
+	}
+	return nil
+}
+
+type IntersectsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IndexId       string                 `protobuf:"bytes,1,opt,name=index_id,json=indexId,proto3" json:"index_id,omitempty"`
+	IdA           uint64                 `protobuf:"varint,2,opt,name=id_a,json=idA,proto3" json:"id_a,omitempty"`
+	IdB           uint64                 `protobuf:"varint,3,opt,name=id_b,json=idB,proto3" json:"id_b,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IntersectsRequest) Reset() {
+	*x = IntersectsRequest{}
+	mi := &file_urbis_proto_msgTypes[50]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IntersectsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IntersectsRequest) ProtoMessage() {}
+
+func (x *IntersectsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[50]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IntersectsRequest.ProtoReflect.Descriptor instead.
+func (*IntersectsRequest) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{50}
+}
+
+func (x *IntersectsRequest) GetIndexId() string {
+	if x != nil {
+		return x.IndexId
+	}
+	return ""
+}
+
+func (x *IntersectsRequest) GetIdA() uint64 {
+	if x != nil {
+		return x.IdA
+	}
+	return 0
+}
+
+func (x *IntersectsRequest) GetIdB() uint64 {
+	if x != nil {
+		return x.IdB
+	}
+	return 0
+}
+
+type ContainsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IndexId       string                 `protobuf:"bytes,1,opt,name=index_id,json=indexId,proto3" json:"index_id,omitempty"`
+	ContainerId   uint64                 `protobuf:"varint,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
+	ContainedId   uint64                 `protobuf:"varint,3,opt,name=contained_id,json=containedId,proto3" json:"contained_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ContainsRequest) Reset() {
+	*x = ContainsRequest{}
+	mi := &file_urbis_proto_msgTypes[51]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ContainsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContainsRequest) ProtoMessage() {}
+
+func (x *ContainsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[51]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ContainsRequest.ProtoReflect.Descriptor instead.
+func (*ContainsRequest) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{51}
+}
+
+func (x *ContainsRequest) GetIndexId() string {
+	if x != nil {
+		return x.IndexId
+	}
+	return ""
+}
+
+func (x *ContainsRequest) GetContainerId() uint64 {
+	if x != nil {
+		return x.ContainerId
+	}
+	return 0
+}
+
+func (x *ContainsRequest) GetContainedId() uint64 {
+	if x != nil {
+		return x.ContainedId
+	}
+	return 0
+}
+
+type DistanceRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IndexId       string                 `protobuf:"bytes,1,opt,name=index_id,json=indexId,proto3" json:"index_id,omitempty"`
+	IdA           uint64                 `protobuf:"varint,2,opt,name=id_a,json=idA,proto3" json:"id_a,omitempty"`
+	IdB           uint64                 `protobuf:"varint,3,opt,name=id_b,json=idB,proto3" json:"id_b,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DistanceRequest) Reset() {
+	*x = DistanceRequest{}
+	mi := &file_urbis_proto_msgTypes[52]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DistanceRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DistanceRequest) ProtoMessage() {}
+
+func (x *DistanceRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[52]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DistanceRequest.ProtoReflect.Descriptor instead.
+func (*DistanceRequest) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{52}
+}
+
+func (x *DistanceRequest) GetIndexId() string {
+	if x != nil {
+		return x.IndexId
+	}
+	return ""
+}
+
+func (x *DistanceRequest) GetIdA() uint64 {
+	if x != nil {
+		return x.IdA
+	}
+	return 0
+}
+
+func (x *DistanceRequest) GetIdB() uint64 {
+	if x != nil {
+		return x.IdB
+	}
+	return 0
+}
+
+type PredicateResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Result        bool                   `protobuf:"varint,1,opt,name=result,proto3" json:"result,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PredicateResponse) Reset() {
+	*x = PredicateResponse{}
+	mi := &file_urbis_proto_msgTypes[53]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PredicateResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PredicateResponse) ProtoMessage() {}
+
+func (x *PredicateResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[53]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PredicateResponse.ProtoReflect.Descriptor instead.
+func (*PredicateResponse) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{53}
+}
+
+func (x *PredicateResponse) GetResult() bool {
+	if x != nil {
+		return x.Result
+	}
+	return false
+}
+
+type DistanceResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Distance      float64                `protobuf:"fixed64,1,opt,name=distance,proto3" json:"distance,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DistanceResponse) Reset() {
+	*x = DistanceResponse{}
+	mi := &file_urbis_proto_msgTypes[54]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DistanceResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DistanceResponse) ProtoMessage() {}
+
+func (x *DistanceResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[54]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DistanceResponse.ProtoReflect.Descriptor instead.
+func (*DistanceResponse) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{54}
+}
+
+func (x *DistanceResponse) GetDistance() float64 {
+	if x != nil {
+		return x.Distance
+	}
+	return 0
+}
+
+type SpatialJoinRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IndexA        string                 `protobuf:"bytes,1,opt,name=index_a,json=indexA,proto3" json:"index_a,omitempty"`
+	IndexB        string                 `protobuf:"bytes,2,opt,name=index_b,json=indexB,proto3" json:"index_b,omitempty"`
+	JoinType      JoinType               `protobuf:"varint,3,opt,name=join_type,json=joinType,proto3,enum=urbis.JoinType" json:"join_type,omitempty"`
+	Distance      float64                `protobuf:"fixed64,4,opt,name=distance,proto3" json:"distance,omitempty"` // For WITHIN joins
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SpatialJoinRequest) Reset() {
+	*x = SpatialJoinRequest{}
+	mi := &file_urbis_proto_msgTypes[55]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SpatialJoinRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SpatialJoinRequest) ProtoMessage() {}
+
+func (x *SpatialJoinRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[55]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SpatialJoinRequest.ProtoReflect.Descriptor instead.
+func (*SpatialJoinRequest) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{55}
+}
+
+func (x *SpatialJoinRequest) GetIndexA() string {
+	if x != nil {
+		return x.IndexA
+	}
+	return ""
+}
+
+func (x *SpatialJoinRequest) GetIndexB() string {
+	if x != nil {
+		return x.IndexB
+	}
+	return ""
+}
+
+func (x *SpatialJoinRequest) GetJoinType() JoinType {
+	if x != nil {
+		return x.JoinType
+	}
+	return JoinType_JOIN_INTERSECTS
+}
+
+func (x *SpatialJoinRequest) GetDistance() float64 {
+	if x != nil {
+		return x.Distance
+	}
+	return 0
+}
+
+type JoinPair struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IdA           uint64                 `protobuf:"varint,1,opt,name=id_a,json=idA,proto3" json:"id_a,omitempty"`
+	IdB           uint64                 `protobuf:"varint,2,opt,name=id_b,json=idB,proto3" json:"id_b,omitempty"`
+	Distance      float64                `protobuf:"fixed64,3,opt,name=distance,proto3" json:"distance,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JoinPair) Reset() {
+	*x = JoinPair{}
+	mi := &file_urbis_proto_msgTypes[56]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JoinPair) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JoinPair) ProtoMessage() {}
+
+func (x *JoinPair) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[56]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JoinPair.ProtoReflect.Descriptor instead.
+func (*JoinPair) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{56}
+}
+
+func (x *JoinPair) GetIdA() uint64 {
+	if x != nil {
+		return x.IdA
+	}
+	return 0
+}
+
+func (x *JoinPair) GetIdB() uint64 {
+	if x != nil {
+		return x.IdB
+	}
+	return 0
+}
+
+func (x *JoinPair) GetDistance() float64 {
+	if x != nil {
+		return x.Distance
+	}
+	return 0
+}
+
+type SpatialJoinResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Pairs         []*JoinPair            `protobuf:"bytes,1,rep,name=pairs,proto3" json:"pairs,omitempty"`
+	Count         uint64                 `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	QueryTimeMs   float64                `protobuf:"fixed64,3,opt,name=query_time_ms,json=queryTimeMs,proto3" json:"query_time_ms,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SpatialJoinResponse) Reset() {
+	*x = SpatialJoinResponse{}
+	mi := &file_urbis_proto_msgTypes[57]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SpatialJoinResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SpatialJoinResponse) ProtoMessage() {}
+
+func (x *SpatialJoinResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[57]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SpatialJoinResponse.ProtoReflect.Descriptor instead.
+func (*SpatialJoinResponse) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{57}
+}
+
+func (x *SpatialJoinResponse) GetPairs() []*JoinPair {
+	if x != nil {
+		return x.Pairs
+	}
+	return nil
+}
+
+func (x *SpatialJoinResponse) GetCount() uint64 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+func (x *SpatialJoinResponse) GetQueryTimeMs() float64 {
+	if x != nil {
+		return x.QueryTimeMs
+	}
+	return 0
+}
+
+type GridAggregationRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IndexId       string                 `protobuf:"bytes,1,opt,name=index_id,json=indexId,proto3" json:"index_id,omitempty"`
+	Bounds        *MBR                   `protobuf:"bytes,2,opt,name=bounds,proto3" json:"bounds,omitempty"` // Optional, NULL for full extent
+	CellSize      float64                `protobuf:"fixed64,3,opt,name=cell_size,json=cellSize,proto3" json:"cell_size,omitempty"`
+	AggType       AggregationType        `protobuf:"varint,4,opt,name=agg_type,json=aggType,proto3,enum=urbis.AggregationType" json:"agg_type,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GridAggregationRequest) Reset() {
+	*x = GridAggregationRequest{}
+	mi := &file_urbis_proto_msgTypes[58]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GridAggregationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GridAggregationRequest) ProtoMessage() {}
+
+func (x *GridAggregationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[58]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GridAggregationRequest.ProtoReflect.Descriptor instead.
+func (*GridAggregationRequest) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{58}
+}
+
+func (x *GridAggregationRequest) GetIndexId() string {
+	if x != nil {
+		return x.IndexId
+	}
+	return ""
+}
+
+func (x *GridAggregationRequest) GetBounds() *MBR {
+	if x != nil {
+		return x.Bounds
+	}
+	return nil
+}
+
+func (x *GridAggregationRequest) GetCellSize() float64 {
+	if x != nil {
+		return x.CellSize
+	}
+	return 0
+}
+
+func (x *GridAggregationRequest) GetAggType() AggregationType {
+	if x != nil {
+		return x.AggType
+	}
+	return AggregationType_AGG_COUNT
+}
+
+type GridCell struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Value         float64                `protobuf:"fixed64,1,opt,name=value,proto3" json:"value,omitempty"`
+	Count         uint64                 `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Bounds        *MBR                   `protobuf:"bytes,3,opt,name=bounds,proto3" json:"bounds,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GridCell) Reset() {
+	*x = GridCell{}
+	mi := &file_urbis_proto_msgTypes[59]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GridCell) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GridCell) ProtoMessage() {}
+
+func (x *GridCell) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[59]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GridCell.ProtoReflect.Descriptor instead.
+func (*GridCell) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{59}
+}
+
+func (x *GridCell) GetValue() float64 {
+	if x != nil {
+		return x.Value
+	}
+	return 0
+}
+
+func (x *GridCell) GetCount() uint64 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+func (x *GridCell) GetBounds() *MBR {
+	if x != nil {
+		return x.Bounds
+	}
+	return nil
+}
+
+type GridAggregationResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Cells         []*GridCell            `protobuf:"bytes,1,rep,name=cells,proto3" json:"cells,omitempty"`
+	Rows          uint64                 `protobuf:"varint,2,opt,name=rows,proto3" json:"rows,omitempty"`
+	Cols          uint64                 `protobuf:"varint,3,opt,name=cols,proto3" json:"cols,omitempty"`
+	Bounds        *MBR                   `protobuf:"bytes,4,opt,name=bounds,proto3" json:"bounds,omitempty"`
+	CellSize      float64                `protobuf:"fixed64,5,opt,name=cell_size,json=cellSize,proto3" json:"cell_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GridAggregationResponse) Reset() {
+	*x = GridAggregationResponse{}
+	mi := &file_urbis_proto_msgTypes[60]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GridAggregationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GridAggregationResponse) ProtoMessage() {}
+
+func (x *GridAggregationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[60]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GridAggregationResponse.ProtoReflect.Descriptor instead.
+func (*GridAggregationResponse) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{60}
+}
+
+func (x *GridAggregationResponse) GetCells() []*GridCell {
+	if x != nil {
+		return x.Cells
+	}
+	return nil
+}
+
+func (x *GridAggregationResponse) GetRows() uint64 {
+	if x != nil {
+		return x.Rows
+	}
+	return 0
+}
+
+func (x *GridAggregationResponse) GetCols() uint64 {
+	if x != nil {
+		return x.Cols
+	}
+	return 0
+}
+
+func (x *GridAggregationResponse) GetBounds() *MBR {
+	if x != nil {
+		return x.Bounds
+	}
+	return nil
+}
+
+func (x *GridAggregationResponse) GetCellSize() float64 {
+	if x != nil {
+		return x.CellSize
+	}
+	return 0
+}
+
+type VoronoiRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IndexId       string                 `protobuf:"bytes,1,opt,name=index_id,json=indexId,proto3" json:"index_id,omitempty"`
+	Bounds        *MBR                   `protobuf:"bytes,2,opt,name=bounds,proto3" json:"bounds,omitempty"` // Optional clipping bounds
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VoronoiRequest) Reset() {
+	*x = VoronoiRequest{}
+	mi := &file_urbis_proto_msgTypes[61]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VoronoiRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VoronoiRequest) ProtoMessage() {}
+
+func (x *VoronoiRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[61]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VoronoiRequest.ProtoReflect.Descriptor instead.
+func (*VoronoiRequest) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{61}
+}
+
+func (x *VoronoiRequest) GetIndexId() string {
+	if x != nil {
+		return x.IndexId
+	}
+	return ""
+}
+
+func (x *VoronoiRequest) GetBounds() *MBR {
+	if x != nil {
+		return x.Bounds
+	}
+	return nil
+}
+
+type VoronoiCell struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Cell          *Polygon               `protobuf:"bytes,1,opt,name=cell,proto3" json:"cell,omitempty"`
+	PointId       uint64                 `protobuf:"varint,2,opt,name=point_id,json=pointId,proto3" json:"point_id,omitempty"`
+	Site          *Point                 `protobuf:"bytes,3,opt,name=site,proto3" json:"site,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VoronoiCell) Reset() {
+	*x = VoronoiCell{}
+	mi := &file_urbis_proto_msgTypes[62]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VoronoiCell) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VoronoiCell) ProtoMessage() {}
+
+func (x *VoronoiCell) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[62]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VoronoiCell.ProtoReflect.Descriptor instead.
+func (*VoronoiCell) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{62}
+}
+
+func (x *VoronoiCell) GetCell() *Polygon {
+	if x != nil {
+		return x.Cell
+	}
+	return nil
+}
+
+func (x *VoronoiCell) GetPointId() uint64 {
+	if x != nil {
+		return x.PointId
+	}
+	return 0
+}
+
+func (x *VoronoiCell) GetSite() *Point {
+	if x != nil {
+		return x.Site
+	}
+	return nil
+}
+
+type VoronoiResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Cells         []*VoronoiCell         `protobuf:"bytes,1,rep,name=cells,proto3" json:"cells,omitempty"`
+	Count         uint64                 `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VoronoiResponse) Reset() {
+	*x = VoronoiResponse{}
+	mi := &file_urbis_proto_msgTypes[63]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VoronoiResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VoronoiResponse) ProtoMessage() {}
+
+func (x *VoronoiResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[63]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VoronoiResponse.ProtoReflect.Descriptor instead.
+func (*VoronoiResponse) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{63}
+}
+
+func (x *VoronoiResponse) GetCells() []*VoronoiCell {
+	if x != nil {
+		return x.Cells
+	}
+	return nil
+}
+
+func (x *VoronoiResponse) GetCount() uint64 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+type DelaunayRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IndexId       string                 `protobuf:"bytes,1,opt,name=index_id,json=indexId,proto3" json:"index_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DelaunayRequest) Reset() {
+	*x = DelaunayRequest{}
+	mi := &file_urbis_proto_msgTypes[64]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DelaunayRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DelaunayRequest) ProtoMessage() {}
+
+func (x *DelaunayRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[64]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DelaunayRequest.ProtoReflect.Descriptor instead.
+func (*DelaunayRequest) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{64}
+}
+
+func (x *DelaunayRequest) GetIndexId() string {
+	if x != nil {
+		return x.IndexId
+	}
+	return ""
+}
+
+type Triangle struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	V1            uint64                 `protobuf:"varint,1,opt,name=v1,proto3" json:"v1,omitempty"`
+	V2            uint64                 `protobuf:"varint,2,opt,name=v2,proto3" json:"v2,omitempty"`
+	V3            uint64                 `protobuf:"varint,3,opt,name=v3,proto3" json:"v3,omitempty"`
+	Circumcenter  *Point                 `protobuf:"bytes,4,opt,name=circumcenter,proto3" json:"circumcenter,omitempty"`
+	Circumradius  float64                `protobuf:"fixed64,5,opt,name=circumradius,proto3" json:"circumradius,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Triangle) Reset() {
+	*x = Triangle{}
+	mi := &file_urbis_proto_msgTypes[65]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Triangle) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Triangle) ProtoMessage() {}
+
+func (x *Triangle) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[65]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Triangle.ProtoReflect.Descriptor instead.
+func (*Triangle) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{65}
+}
+
+func (x *Triangle) GetV1() uint64 {
+	if x != nil {
+		return x.V1
+	}
+	return 0
+}
+
+func (x *Triangle) GetV2() uint64 {
+	if x != nil {
+		return x.V2
+	}
+	return 0
+}
+
+func (x *Triangle) GetV3() uint64 {
+	if x != nil {
+		return x.V3
+	}
+	return 0
+}
+
+func (x *Triangle) GetCircumcenter() *Point {
+	if x != nil {
+		return x.Circumcenter
+	}
+	return nil
+}
+
+func (x *Triangle) GetCircumradius() float64 {
+	if x != nil {
+		return x.Circumradius
+	}
+	return 0
+}
+
+type DelaunayResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Triangles     []*Triangle            `protobuf:"bytes,1,rep,name=triangles,proto3" json:"triangles,omitempty"`
+	Count         uint64                 `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DelaunayResponse) Reset() {
+	*x = DelaunayResponse{}
+	mi := &file_urbis_proto_msgTypes[66]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DelaunayResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DelaunayResponse) ProtoMessage() {}
+
+func (x *DelaunayResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[66]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DelaunayResponse.ProtoReflect.Descriptor instead.
+func (*DelaunayResponse) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{66}
+}
+
+func (x *DelaunayResponse) GetTriangles() []*Triangle {
+	if x != nil {
+		return x.Triangles
+	}
+	return nil
+}
+
+func (x *DelaunayResponse) GetCount() uint64 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+type ConvexHullRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IndexId       string                 `protobuf:"bytes,1,opt,name=index_id,json=indexId,proto3" json:"index_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConvexHullRequest) Reset() {
+	*x = ConvexHullRequest{}
+	mi := &file_urbis_proto_msgTypes[67]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConvexHullRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConvexHullRequest) ProtoMessage() {}
+
+func (x *ConvexHullRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[67]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConvexHullRequest.ProtoReflect.Descriptor instead.
+func (*ConvexHullRequest) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{67}
+}
+
+func (x *ConvexHullRequest) GetIndexId() string {
+	if x != nil {
+		return x.IndexId
+	}
+	return ""
+}
+
+type ConvexHullResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Hull          *Polygon               `protobuf:"bytes,1,opt,name=hull,proto3" json:"hull,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConvexHullResponse) Reset() {
+	*x = ConvexHullResponse{}
+	mi := &file_urbis_proto_msgTypes[68]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConvexHullResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConvexHullResponse) ProtoMessage() {}
+
+func (x *ConvexHullResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_urbis_proto_msgTypes[68]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConvexHullResponse.ProtoReflect.Descriptor instead.
+func (*ConvexHullResponse) Descriptor() ([]byte, []int) {
+	return file_urbis_proto_rawDescGZIP(), []int{68}
+}
+
+func (x *ConvexHullResponse) GetHull() *Polygon {
+	if x != nil {
+		return x.Hull
+	}
+	return nil
+}
+
 var File_urbis_proto protoreflect.FileDescriptor
 
 const file_urbis_proto_rawDesc = "" +
@@ -2763,12 +4134,108 @@ const file_urbis_proto_rawDesc = "" +
 	"\bindex_id\x18\x01 \x01(\tR\aindexId\x12\x12\n" +
 	"\x04path\x18\x02 \x01(\tR\x04path\"-\n" +
 	"\x11LoadIndexResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage*A\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\x7f\n" +
+	"\rBufferRequest\x12\x19\n" +
+	"\bindex_id\x18\x01 \x01(\tR\aindexId\x12\x1b\n" +
+	"\tobject_id\x18\x02 \x01(\x04R\bobjectId\x12\x1a\n" +
+	"\bdistance\x18\x03 \x01(\x01R\bdistance\x12\x1a\n" +
+	"\bsegments\x18\x04 \x01(\x05R\bsegments\"h\n" +
+	"\x12BufferPointRequest\x12\f\n" +
+	"\x01x\x18\x01 \x01(\x01R\x01x\x12\f\n" +
+	"\x01y\x18\x02 \x01(\x01R\x01y\x12\x1a\n" +
+	"\bdistance\x18\x03 \x01(\x01R\bdistance\x12\x1a\n" +
+	"\bsegments\x18\x04 \x01(\x05R\bsegments\":\n" +
+	"\x0eBufferResponse\x12(\n" +
+	"\apolygon\x18\x01 \x01(\v2\x0e.urbis.PolygonR\apolygon\"T\n" +
+	"\x11IntersectsRequest\x12\x19\n" +
+	"\bindex_id\x18\x01 \x01(\tR\aindexId\x12\x11\n" +
+	"\x04id_a\x18\x02 \x01(\x04R\x03idA\x12\x11\n" +
+	"\x04id_b\x18\x03 \x01(\x04R\x03idB\"r\n" +
+	"\x0fContainsRequest\x12\x19\n" +
+	"\bindex_id\x18\x01 \x01(\tR\aindexId\x12!\n" +
+	"\fcontainer_id\x18\x02 \x01(\x04R\vcontainerId\x12!\n" +
+	"\fcontained_id\x18\x03 \x01(\x04R\vcontainedId\"R\n" +
+	"\x0fDistanceRequest\x12\x19\n" +
+	"\bindex_id\x18\x01 \x01(\tR\aindexId\x12\x11\n" +
+	"\x04id_a\x18\x02 \x01(\x04R\x03idA\x12\x11\n" +
+	"\x04id_b\x18\x03 \x01(\x04R\x03idB\"+\n" +
+	"\x11PredicateResponse\x12\x16\n" +
+	"\x06result\x18\x01 \x01(\bR\x06result\".\n" +
+	"\x10DistanceResponse\x12\x1a\n" +
+	"\bdistance\x18\x01 \x01(\x01R\bdistance\"\x90\x01\n" +
+	"\x12SpatialJoinRequest\x12\x17\n" +
+	"\aindex_a\x18\x01 \x01(\tR\x06indexA\x12\x17\n" +
+	"\aindex_b\x18\x02 \x01(\tR\x06indexB\x12,\n" +
+	"\tjoin_type\x18\x03 \x01(\x0e2\x0f.urbis.JoinTypeR\bjoinType\x12\x1a\n" +
+	"\bdistance\x18\x04 \x01(\x01R\bdistance\"L\n" +
+	"\bJoinPair\x12\x11\n" +
+	"\x04id_a\x18\x01 \x01(\x04R\x03idA\x12\x11\n" +
+	"\x04id_b\x18\x02 \x01(\x04R\x03idB\x12\x1a\n" +
+	"\bdistance\x18\x03 \x01(\x01R\bdistance\"v\n" +
+	"\x13SpatialJoinResponse\x12%\n" +
+	"\x05pairs\x18\x01 \x03(\v2\x0f.urbis.JoinPairR\x05pairs\x12\x14\n" +
+	"\x05count\x18\x02 \x01(\x04R\x05count\x12\"\n" +
+	"\rquery_time_ms\x18\x03 \x01(\x01R\vqueryTimeMs\"\xa7\x01\n" +
+	"\x16GridAggregationRequest\x12\x19\n" +
+	"\bindex_id\x18\x01 \x01(\tR\aindexId\x12\"\n" +
+	"\x06bounds\x18\x02 \x01(\v2\n" +
+	".urbis.MBRR\x06bounds\x12\x1b\n" +
+	"\tcell_size\x18\x03 \x01(\x01R\bcellSize\x121\n" +
+	"\bagg_type\x18\x04 \x01(\x0e2\x16.urbis.AggregationTypeR\aaggType\"Z\n" +
+	"\bGridCell\x12\x14\n" +
+	"\x05value\x18\x01 \x01(\x01R\x05value\x12\x14\n" +
+	"\x05count\x18\x02 \x01(\x04R\x05count\x12\"\n" +
+	"\x06bounds\x18\x03 \x01(\v2\n" +
+	".urbis.MBRR\x06bounds\"\xa9\x01\n" +
+	"\x17GridAggregationResponse\x12%\n" +
+	"\x05cells\x18\x01 \x03(\v2\x0f.urbis.GridCellR\x05cells\x12\x12\n" +
+	"\x04rows\x18\x02 \x01(\x04R\x04rows\x12\x12\n" +
+	"\x04cols\x18\x03 \x01(\x04R\x04cols\x12\"\n" +
+	"\x06bounds\x18\x04 \x01(\v2\n" +
+	".urbis.MBRR\x06bounds\x12\x1b\n" +
+	"\tcell_size\x18\x05 \x01(\x01R\bcellSize\"O\n" +
+	"\x0eVoronoiRequest\x12\x19\n" +
+	"\bindex_id\x18\x01 \x01(\tR\aindexId\x12\"\n" +
+	"\x06bounds\x18\x02 \x01(\v2\n" +
+	".urbis.MBRR\x06bounds\"n\n" +
+	"\vVoronoiCell\x12\"\n" +
+	"\x04cell\x18\x01 \x01(\v2\x0e.urbis.PolygonR\x04cell\x12\x19\n" +
+	"\bpoint_id\x18\x02 \x01(\x04R\apointId\x12 \n" +
+	"\x04site\x18\x03 \x01(\v2\f.urbis.PointR\x04site\"Q\n" +
+	"\x0fVoronoiResponse\x12(\n" +
+	"\x05cells\x18\x01 \x03(\v2\x12.urbis.VoronoiCellR\x05cells\x12\x14\n" +
+	"\x05count\x18\x02 \x01(\x04R\x05count\",\n" +
+	"\x0fDelaunayRequest\x12\x19\n" +
+	"\bindex_id\x18\x01 \x01(\tR\aindexId\"\x90\x01\n" +
+	"\bTriangle\x12\x0e\n" +
+	"\x02v1\x18\x01 \x01(\x04R\x02v1\x12\x0e\n" +
+	"\x02v2\x18\x02 \x01(\x04R\x02v2\x12\x0e\n" +
+	"\x02v3\x18\x03 \x01(\x04R\x02v3\x120\n" +
+	"\fcircumcenter\x18\x04 \x01(\v2\f.urbis.PointR\fcircumcenter\x12\"\n" +
+	"\fcircumradius\x18\x05 \x01(\x01R\fcircumradius\"W\n" +
+	"\x10DelaunayResponse\x12-\n" +
+	"\ttriangles\x18\x01 \x03(\v2\x0f.urbis.TriangleR\ttriangles\x12\x14\n" +
+	"\x05count\x18\x02 \x01(\x04R\x05count\".\n" +
+	"\x11ConvexHullRequest\x12\x19\n" +
+	"\bindex_id\x18\x01 \x01(\tR\aindexId\"8\n" +
+	"\x12ConvexHullResponse\x12\"\n" +
+	"\x04hull\x18\x01 \x01(\v2\x0e.urbis.PolygonR\x04hull*A\n" +
 	"\bGeomType\x12\x0e\n" +
 	"\n" +
 	"GEOM_POINT\x10\x00\x12\x13\n" +
 	"\x0fGEOM_LINESTRING\x10\x01\x12\x10\n" +
-	"\fGEOM_POLYGON\x10\x022\xb8\v\n" +
+	"\fGEOM_POLYGON\x10\x02*U\n" +
+	"\bJoinType\x12\x13\n" +
+	"\x0fJOIN_INTERSECTS\x10\x00\x12\x0f\n" +
+	"\vJOIN_WITHIN\x10\x01\x12\x11\n" +
+	"\rJOIN_CONTAINS\x10\x02\x12\x10\n" +
+	"\fJOIN_NEAREST\x10\x03*T\n" +
+	"\x0fAggregationType\x12\r\n" +
+	"\tAGG_COUNT\x10\x00\x12\v\n" +
+	"\aAGG_SUM\x10\x01\x12\v\n" +
+	"\aAGG_AVG\x10\x02\x12\v\n" +
+	"\aAGG_MIN\x10\x03\x12\v\n" +
+	"\aAGG_MAX\x10\x042\xbd\x10\n" +
 	"\fUrbisService\x12D\n" +
 	"\vCreateIndex\x12\x19.urbis.CreateIndexRequest\x1a\x1a.urbis.CreateIndexResponse\x12G\n" +
 	"\fDestroyIndex\x12\x1a.urbis.DestroyIndexRequest\x1a\x1b.urbis.DestroyIndexResponse\x12D\n" +
@@ -2794,7 +4261,19 @@ const file_urbis_proto_rawDesc = "" +
 	"\bGetCount\x12\x13.urbis.CountRequest\x1a\x14.urbis.CountResponse\x128\n" +
 	"\tGetBounds\x12\x14.urbis.BoundsRequest\x1a\x15.urbis.BoundsResponse\x12/\n" +
 	"\x04Save\x12\x12.urbis.SaveRequest\x1a\x13.urbis.SaveResponse\x129\n" +
-	"\x04Load\x12\x17.urbis.LoadIndexRequest\x1a\x18.urbis.LoadIndexResponseB\x1dZ\x1bgithub.com/urbis/api/pkg/pbb\x06proto3"
+	"\x04Load\x12\x17.urbis.LoadIndexRequest\x1a\x18.urbis.LoadIndexResponse\x125\n" +
+	"\x06Buffer\x12\x14.urbis.BufferRequest\x1a\x15.urbis.BufferResponse\x12?\n" +
+	"\vBufferPoint\x12\x19.urbis.BufferPointRequest\x1a\x15.urbis.BufferResponse\x12@\n" +
+	"\n" +
+	"Intersects\x12\x18.urbis.IntersectsRequest\x1a\x18.urbis.PredicateResponse\x12<\n" +
+	"\bContains\x12\x16.urbis.ContainsRequest\x1a\x18.urbis.PredicateResponse\x12;\n" +
+	"\bDistance\x12\x16.urbis.DistanceRequest\x1a\x17.urbis.DistanceResponse\x12D\n" +
+	"\vSpatialJoin\x12\x19.urbis.SpatialJoinRequest\x1a\x1a.urbis.SpatialJoinResponse\x12N\n" +
+	"\rAggregateGrid\x12\x1d.urbis.GridAggregationRequest\x1a\x1e.urbis.GridAggregationResponse\x128\n" +
+	"\aVoronoi\x12\x15.urbis.VoronoiRequest\x1a\x16.urbis.VoronoiResponse\x12;\n" +
+	"\bDelaunay\x12\x16.urbis.DelaunayRequest\x1a\x17.urbis.DelaunayResponse\x12A\n" +
+	"\n" +
+	"ConvexHull\x12\x18.urbis.ConvexHullRequest\x1a\x19.urbis.ConvexHullResponseB\x1dZ\x1bgithub.com/urbis/api/pkg/pbb\x06proto3"
 
 var (
 	file_urbis_proto_rawDescOnce sync.Once
@@ -2808,131 +4287,190 @@ func file_urbis_proto_rawDescGZIP() []byte {
 	return file_urbis_proto_rawDescData
 }
 
-var file_urbis_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_urbis_proto_msgTypes = make([]protoimpl.MessageInfo, 47)
+var file_urbis_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_urbis_proto_msgTypes = make([]protoimpl.MessageInfo, 69)
 var file_urbis_proto_goTypes = []any{
 	(GeomType)(0),                    // 0: urbis.GeomType
-	(*Point)(nil),                    // 1: urbis.Point
-	(*MBR)(nil),                      // 2: urbis.MBR
-	(*LineString)(nil),               // 3: urbis.LineString
-	(*Polygon)(nil),                  // 4: urbis.Polygon
-	(*Ring)(nil),                     // 5: urbis.Ring
-	(*SpatialObject)(nil),            // 6: urbis.SpatialObject
-	(*Config)(nil),                   // 7: urbis.Config
-	(*Stats)(nil),                    // 8: urbis.Stats
-	(*PageInfo)(nil),                 // 9: urbis.PageInfo
-	(*CreateIndexRequest)(nil),       // 10: urbis.CreateIndexRequest
-	(*CreateIndexResponse)(nil),      // 11: urbis.CreateIndexResponse
-	(*DestroyIndexRequest)(nil),      // 12: urbis.DestroyIndexRequest
-	(*DestroyIndexResponse)(nil),     // 13: urbis.DestroyIndexResponse
-	(*ListIndexesRequest)(nil),       // 14: urbis.ListIndexesRequest
-	(*ListIndexesResponse)(nil),      // 15: urbis.ListIndexesResponse
-	(*LoadGeoJSONRequest)(nil),       // 16: urbis.LoadGeoJSONRequest
-	(*LoadGeoJSONStringRequest)(nil), // 17: urbis.LoadGeoJSONStringRequest
-	(*LoadWKTRequest)(nil),           // 18: urbis.LoadWKTRequest
-	(*LoadResponse)(nil),             // 19: urbis.LoadResponse
-	(*InsertPointRequest)(nil),       // 20: urbis.InsertPointRequest
-	(*InsertLineStringRequest)(nil),  // 21: urbis.InsertLineStringRequest
-	(*InsertPolygonRequest)(nil),     // 22: urbis.InsertPolygonRequest
-	(*InsertResponse)(nil),           // 23: urbis.InsertResponse
-	(*RemoveRequest)(nil),            // 24: urbis.RemoveRequest
-	(*RemoveResponse)(nil),           // 25: urbis.RemoveResponse
-	(*GetObjectRequest)(nil),         // 26: urbis.GetObjectRequest
-	(*GetObjectResponse)(nil),        // 27: urbis.GetObjectResponse
-	(*BuildRequest)(nil),             // 28: urbis.BuildRequest
-	(*BuildResponse)(nil),            // 29: urbis.BuildResponse
-	(*OptimizeRequest)(nil),          // 30: urbis.OptimizeRequest
-	(*OptimizeResponse)(nil),         // 31: urbis.OptimizeResponse
-	(*RangeQueryRequest)(nil),        // 32: urbis.RangeQueryRequest
-	(*PointQueryRequest)(nil),        // 33: urbis.PointQueryRequest
-	(*KNNQueryRequest)(nil),          // 34: urbis.KNNQueryRequest
-	(*QueryResponse)(nil),            // 35: urbis.QueryResponse
-	(*AdjacentPagesRequest)(nil),     // 36: urbis.AdjacentPagesRequest
-	(*AdjacentPagesResponse)(nil),    // 37: urbis.AdjacentPagesResponse
-	(*StatsRequest)(nil),             // 38: urbis.StatsRequest
-	(*StatsResponse)(nil),            // 39: urbis.StatsResponse
-	(*CountRequest)(nil),             // 40: urbis.CountRequest
-	(*CountResponse)(nil),            // 41: urbis.CountResponse
-	(*BoundsRequest)(nil),            // 42: urbis.BoundsRequest
-	(*BoundsResponse)(nil),           // 43: urbis.BoundsResponse
-	(*SaveRequest)(nil),              // 44: urbis.SaveRequest
-	(*SaveResponse)(nil),             // 45: urbis.SaveResponse
-	(*LoadIndexRequest)(nil),         // 46: urbis.LoadIndexRequest
-	(*LoadIndexResponse)(nil),        // 47: urbis.LoadIndexResponse
+	(JoinType)(0),                    // 1: urbis.JoinType
+	(AggregationType)(0),             // 2: urbis.AggregationType
+	(*Point)(nil),                    // 3: urbis.Point
+	(*MBR)(nil),                      // 4: urbis.MBR
+	(*LineString)(nil),               // 5: urbis.LineString
+	(*Polygon)(nil),                  // 6: urbis.Polygon
+	(*Ring)(nil),                     // 7: urbis.Ring
+	(*SpatialObject)(nil),            // 8: urbis.SpatialObject
+	(*Config)(nil),                   // 9: urbis.Config
+	(*Stats)(nil),                    // 10: urbis.Stats
+	(*PageInfo)(nil),                 // 11: urbis.PageInfo
+	(*CreateIndexRequest)(nil),       // 12: urbis.CreateIndexRequest
+	(*CreateIndexResponse)(nil),      // 13: urbis.CreateIndexResponse
+	(*DestroyIndexRequest)(nil),      // 14: urbis.DestroyIndexRequest
+	(*DestroyIndexResponse)(nil),     // 15: urbis.DestroyIndexResponse
+	(*ListIndexesRequest)(nil),       // 16: urbis.ListIndexesRequest
+	(*ListIndexesResponse)(nil),      // 17: urbis.ListIndexesResponse
+	(*LoadGeoJSONRequest)(nil),       // 18: urbis.LoadGeoJSONRequest
+	(*LoadGeoJSONStringRequest)(nil), // 19: urbis.LoadGeoJSONStringRequest
+	(*LoadWKTRequest)(nil),           // 20: urbis.LoadWKTRequest
+	(*LoadResponse)(nil),             // 21: urbis.LoadResponse
+	(*InsertPointRequest)(nil),       // 22: urbis.InsertPointRequest
+	(*InsertLineStringRequest)(nil),  // 23: urbis.InsertLineStringRequest
+	(*InsertPolygonRequest)(nil),     // 24: urbis.InsertPolygonRequest
+	(*InsertResponse)(nil),           // 25: urbis.InsertResponse
+	(*RemoveRequest)(nil),            // 26: urbis.RemoveRequest
+	(*RemoveResponse)(nil),           // 27: urbis.RemoveResponse
+	(*GetObjectRequest)(nil),         // 28: urbis.GetObjectRequest
+	(*GetObjectResponse)(nil),        // 29: urbis.GetObjectResponse
+	(*BuildRequest)(nil),             // 30: urbis.BuildRequest
+	(*BuildResponse)(nil),            // 31: urbis.BuildResponse
+	(*OptimizeRequest)(nil),          // 32: urbis.OptimizeRequest
+	(*OptimizeResponse)(nil),         // 33: urbis.OptimizeResponse
+	(*RangeQueryRequest)(nil),        // 34: urbis.RangeQueryRequest
+	(*PointQueryRequest)(nil),        // 35: urbis.PointQueryRequest
+	(*KNNQueryRequest)(nil),          // 36: urbis.KNNQueryRequest
+	(*QueryResponse)(nil),            // 37: urbis.QueryResponse
+	(*AdjacentPagesRequest)(nil),     // 38: urbis.AdjacentPagesRequest
+	(*AdjacentPagesResponse)(nil),    // 39: urbis.AdjacentPagesResponse
+	(*StatsRequest)(nil),             // 40: urbis.StatsRequest
+	(*StatsResponse)(nil),            // 41: urbis.StatsResponse
+	(*CountRequest)(nil),             // 42: urbis.CountRequest
+	(*CountResponse)(nil),            // 43: urbis.CountResponse
+	(*BoundsRequest)(nil),            // 44: urbis.BoundsRequest
+	(*BoundsResponse)(nil),           // 45: urbis.BoundsResponse
+	(*SaveRequest)(nil),              // 46: urbis.SaveRequest
+	(*SaveResponse)(nil),             // 47: urbis.SaveResponse
+	(*LoadIndexRequest)(nil),         // 48: urbis.LoadIndexRequest
+	(*LoadIndexResponse)(nil),        // 49: urbis.LoadIndexResponse
+	(*BufferRequest)(nil),            // 50: urbis.BufferRequest
+	(*BufferPointRequest)(nil),       // 51: urbis.BufferPointRequest
+	(*BufferResponse)(nil),           // 52: urbis.BufferResponse
+	(*IntersectsRequest)(nil),        // 53: urbis.IntersectsRequest
+	(*ContainsRequest)(nil),          // 54: urbis.ContainsRequest
+	(*DistanceRequest)(nil),          // 55: urbis.DistanceRequest
+	(*PredicateResponse)(nil),        // 56: urbis.PredicateResponse
+	(*DistanceResponse)(nil),         // 57: urbis.DistanceResponse
+	(*SpatialJoinRequest)(nil),       // 58: urbis.SpatialJoinRequest
+	(*JoinPair)(nil),                 // 59: urbis.JoinPair
+	(*SpatialJoinResponse)(nil),      // 60: urbis.SpatialJoinResponse
+	(*GridAggregationRequest)(nil),   // 61: urbis.GridAggregationRequest
+	(*GridCell)(nil),                 // 62: urbis.GridCell
+	(*GridAggregationResponse)(nil),  // 63: urbis.GridAggregationResponse
+	(*VoronoiRequest)(nil),           // 64: urbis.VoronoiRequest
+	(*VoronoiCell)(nil),              // 65: urbis.VoronoiCell
+	(*VoronoiResponse)(nil),          // 66: urbis.VoronoiResponse
+	(*DelaunayRequest)(nil),          // 67: urbis.DelaunayRequest
+	(*Triangle)(nil),                 // 68: urbis.Triangle
+	(*DelaunayResponse)(nil),         // 69: urbis.DelaunayResponse
+	(*ConvexHullRequest)(nil),        // 70: urbis.ConvexHullRequest
+	(*ConvexHullResponse)(nil),       // 71: urbis.ConvexHullResponse
 }
 var file_urbis_proto_depIdxs = []int32{
-	1,  // 0: urbis.LineString.points:type_name -> urbis.Point
-	1,  // 1: urbis.Polygon.exterior:type_name -> urbis.Point
-	5,  // 2: urbis.Polygon.holes:type_name -> urbis.Ring
-	1,  // 3: urbis.Ring.points:type_name -> urbis.Point
+	3,  // 0: urbis.LineString.points:type_name -> urbis.Point
+	3,  // 1: urbis.Polygon.exterior:type_name -> urbis.Point
+	7,  // 2: urbis.Polygon.holes:type_name -> urbis.Ring
+	3,  // 3: urbis.Ring.points:type_name -> urbis.Point
 	0,  // 4: urbis.SpatialObject.type:type_name -> urbis.GeomType
-	1,  // 5: urbis.SpatialObject.point:type_name -> urbis.Point
-	3,  // 6: urbis.SpatialObject.line:type_name -> urbis.LineString
-	4,  // 7: urbis.SpatialObject.polygon:type_name -> urbis.Polygon
-	1,  // 8: urbis.SpatialObject.centroid:type_name -> urbis.Point
-	2,  // 9: urbis.SpatialObject.mbr:type_name -> urbis.MBR
-	2,  // 10: urbis.Stats.bounds:type_name -> urbis.MBR
-	7,  // 11: urbis.CreateIndexRequest.config:type_name -> urbis.Config
-	1,  // 12: urbis.InsertLineStringRequest.points:type_name -> urbis.Point
-	1,  // 13: urbis.InsertPolygonRequest.exterior:type_name -> urbis.Point
-	6,  // 14: urbis.GetObjectResponse.object:type_name -> urbis.SpatialObject
-	2,  // 15: urbis.RangeQueryRequest.range:type_name -> urbis.MBR
-	6,  // 16: urbis.QueryResponse.objects:type_name -> urbis.SpatialObject
-	2,  // 17: urbis.AdjacentPagesRequest.region:type_name -> urbis.MBR
-	9,  // 18: urbis.AdjacentPagesResponse.pages:type_name -> urbis.PageInfo
-	8,  // 19: urbis.StatsResponse.stats:type_name -> urbis.Stats
-	2,  // 20: urbis.BoundsResponse.bounds:type_name -> urbis.MBR
-	10, // 21: urbis.UrbisService.CreateIndex:input_type -> urbis.CreateIndexRequest
-	12, // 22: urbis.UrbisService.DestroyIndex:input_type -> urbis.DestroyIndexRequest
-	14, // 23: urbis.UrbisService.ListIndexes:input_type -> urbis.ListIndexesRequest
-	16, // 24: urbis.UrbisService.LoadGeoJSON:input_type -> urbis.LoadGeoJSONRequest
-	17, // 25: urbis.UrbisService.LoadGeoJSONString:input_type -> urbis.LoadGeoJSONStringRequest
-	18, // 26: urbis.UrbisService.LoadWKT:input_type -> urbis.LoadWKTRequest
-	20, // 27: urbis.UrbisService.InsertPoint:input_type -> urbis.InsertPointRequest
-	21, // 28: urbis.UrbisService.InsertLineString:input_type -> urbis.InsertLineStringRequest
-	22, // 29: urbis.UrbisService.InsertPolygon:input_type -> urbis.InsertPolygonRequest
-	24, // 30: urbis.UrbisService.Remove:input_type -> urbis.RemoveRequest
-	26, // 31: urbis.UrbisService.GetObject:input_type -> urbis.GetObjectRequest
-	28, // 32: urbis.UrbisService.Build:input_type -> urbis.BuildRequest
-	30, // 33: urbis.UrbisService.Optimize:input_type -> urbis.OptimizeRequest
-	32, // 34: urbis.UrbisService.QueryRange:input_type -> urbis.RangeQueryRequest
-	33, // 35: urbis.UrbisService.QueryPoint:input_type -> urbis.PointQueryRequest
-	34, // 36: urbis.UrbisService.QueryKNN:input_type -> urbis.KNNQueryRequest
-	32, // 37: urbis.UrbisService.QueryAdjacent:input_type -> urbis.RangeQueryRequest
-	36, // 38: urbis.UrbisService.FindAdjacentPages:input_type -> urbis.AdjacentPagesRequest
-	38, // 39: urbis.UrbisService.GetStats:input_type -> urbis.StatsRequest
-	40, // 40: urbis.UrbisService.GetCount:input_type -> urbis.CountRequest
-	42, // 41: urbis.UrbisService.GetBounds:input_type -> urbis.BoundsRequest
-	44, // 42: urbis.UrbisService.Save:input_type -> urbis.SaveRequest
-	46, // 43: urbis.UrbisService.Load:input_type -> urbis.LoadIndexRequest
-	11, // 44: urbis.UrbisService.CreateIndex:output_type -> urbis.CreateIndexResponse
-	13, // 45: urbis.UrbisService.DestroyIndex:output_type -> urbis.DestroyIndexResponse
-	15, // 46: urbis.UrbisService.ListIndexes:output_type -> urbis.ListIndexesResponse
-	19, // 47: urbis.UrbisService.LoadGeoJSON:output_type -> urbis.LoadResponse
-	19, // 48: urbis.UrbisService.LoadGeoJSONString:output_type -> urbis.LoadResponse
-	19, // 49: urbis.UrbisService.LoadWKT:output_type -> urbis.LoadResponse
-	23, // 50: urbis.UrbisService.InsertPoint:output_type -> urbis.InsertResponse
-	23, // 51: urbis.UrbisService.InsertLineString:output_type -> urbis.InsertResponse
-	23, // 52: urbis.UrbisService.InsertPolygon:output_type -> urbis.InsertResponse
-	25, // 53: urbis.UrbisService.Remove:output_type -> urbis.RemoveResponse
-	27, // 54: urbis.UrbisService.GetObject:output_type -> urbis.GetObjectResponse
-	29, // 55: urbis.UrbisService.Build:output_type -> urbis.BuildResponse
-	31, // 56: urbis.UrbisService.Optimize:output_type -> urbis.OptimizeResponse
-	35, // 57: urbis.UrbisService.QueryRange:output_type -> urbis.QueryResponse
-	35, // 58: urbis.UrbisService.QueryPoint:output_type -> urbis.QueryResponse
-	35, // 59: urbis.UrbisService.QueryKNN:output_type -> urbis.QueryResponse
-	35, // 60: urbis.UrbisService.QueryAdjacent:output_type -> urbis.QueryResponse
-	37, // 61: urbis.UrbisService.FindAdjacentPages:output_type -> urbis.AdjacentPagesResponse
-	39, // 62: urbis.UrbisService.GetStats:output_type -> urbis.StatsResponse
-	41, // 63: urbis.UrbisService.GetCount:output_type -> urbis.CountResponse
-	43, // 64: urbis.UrbisService.GetBounds:output_type -> urbis.BoundsResponse
-	45, // 65: urbis.UrbisService.Save:output_type -> urbis.SaveResponse
-	47, // 66: urbis.UrbisService.Load:output_type -> urbis.LoadIndexResponse
-	44, // [44:67] is the sub-list for method output_type
-	21, // [21:44] is the sub-list for method input_type
-	21, // [21:21] is the sub-list for extension type_name
-	21, // [21:21] is the sub-list for extension extendee
-	0,  // [0:21] is the sub-list for field type_name
+	3,  // 5: urbis.SpatialObject.point:type_name -> urbis.Point
+	5,  // 6: urbis.SpatialObject.line:type_name -> urbis.LineString
+	6,  // 7: urbis.SpatialObject.polygon:type_name -> urbis.Polygon
+	3,  // 8: urbis.SpatialObject.centroid:type_name -> urbis.Point
+	4,  // 9: urbis.SpatialObject.mbr:type_name -> urbis.MBR
+	4,  // 10: urbis.Stats.bounds:type_name -> urbis.MBR
+	9,  // 11: urbis.CreateIndexRequest.config:type_name -> urbis.Config
+	3,  // 12: urbis.InsertLineStringRequest.points:type_name -> urbis.Point
+	3,  // 13: urbis.InsertPolygonRequest.exterior:type_name -> urbis.Point
+	8,  // 14: urbis.GetObjectResponse.object:type_name -> urbis.SpatialObject
+	4,  // 15: urbis.RangeQueryRequest.range:type_name -> urbis.MBR
+	8,  // 16: urbis.QueryResponse.objects:type_name -> urbis.SpatialObject
+	4,  // 17: urbis.AdjacentPagesRequest.region:type_name -> urbis.MBR
+	11, // 18: urbis.AdjacentPagesResponse.pages:type_name -> urbis.PageInfo
+	10, // 19: urbis.StatsResponse.stats:type_name -> urbis.Stats
+	4,  // 20: urbis.BoundsResponse.bounds:type_name -> urbis.MBR
+	6,  // 21: urbis.BufferResponse.polygon:type_name -> urbis.Polygon
+	1,  // 22: urbis.SpatialJoinRequest.join_type:type_name -> urbis.JoinType
+	59, // 23: urbis.SpatialJoinResponse.pairs:type_name -> urbis.JoinPair
+	4,  // 24: urbis.GridAggregationRequest.bounds:type_name -> urbis.MBR
+	2,  // 25: urbis.GridAggregationRequest.agg_type:type_name -> urbis.AggregationType
+	4,  // 26: urbis.GridCell.bounds:type_name -> urbis.MBR
+	62, // 27: urbis.GridAggregationResponse.cells:type_name -> urbis.GridCell
+	4,  // 28: urbis.GridAggregationResponse.bounds:type_name -> urbis.MBR
+	4,  // 29: urbis.VoronoiRequest.bounds:type_name -> urbis.MBR
+	6,  // 30: urbis.VoronoiCell.cell:type_name -> urbis.Polygon
+	3,  // 31: urbis.VoronoiCell.site:type_name -> urbis.Point
+	65, // 32: urbis.VoronoiResponse.cells:type_name -> urbis.VoronoiCell
+	3,  // 33: urbis.Triangle.circumcenter:type_name -> urbis.Point
+	68, // 34: urbis.DelaunayResponse.triangles:type_name -> urbis.Triangle
+	6,  // 35: urbis.ConvexHullResponse.hull:type_name -> urbis.Polygon
+	12, // 36: urbis.UrbisService.CreateIndex:input_type -> urbis.CreateIndexRequest
+	14, // 37: urbis.UrbisService.DestroyIndex:input_type -> urbis.DestroyIndexRequest
+	16, // 38: urbis.UrbisService.ListIndexes:input_type -> urbis.ListIndexesRequest
+	18, // 39: urbis.UrbisService.LoadGeoJSON:input_type -> urbis.LoadGeoJSONRequest
+	19, // 40: urbis.UrbisService.LoadGeoJSONString:input_type -> urbis.LoadGeoJSONStringRequest
+	20, // 41: urbis.UrbisService.LoadWKT:input_type -> urbis.LoadWKTRequest
+	22, // 42: urbis.UrbisService.InsertPoint:input_type -> urbis.InsertPointRequest
+	23, // 43: urbis.UrbisService.InsertLineString:input_type -> urbis.InsertLineStringRequest
+	24, // 44: urbis.UrbisService.InsertPolygon:input_type -> urbis.InsertPolygonRequest
+	26, // 45: urbis.UrbisService.Remove:input_type -> urbis.RemoveRequest
+	28, // 46: urbis.UrbisService.GetObject:input_type -> urbis.GetObjectRequest
+	30, // 47: urbis.UrbisService.Build:input_type -> urbis.BuildRequest
+	32, // 48: urbis.UrbisService.Optimize:input_type -> urbis.OptimizeRequest
+	34, // 49: urbis.UrbisService.QueryRange:input_type -> urbis.RangeQueryRequest
+	35, // 50: urbis.UrbisService.QueryPoint:input_type -> urbis.PointQueryRequest
+	36, // 51: urbis.UrbisService.QueryKNN:input_type -> urbis.KNNQueryRequest
+	34, // 52: urbis.UrbisService.QueryAdjacent:input_type -> urbis.RangeQueryRequest
+	38, // 53: urbis.UrbisService.FindAdjacentPages:input_type -> urbis.AdjacentPagesRequest
+	40, // 54: urbis.UrbisService.GetStats:input_type -> urbis.StatsRequest
+	42, // 55: urbis.UrbisService.GetCount:input_type -> urbis.CountRequest
+	44, // 56: urbis.UrbisService.GetBounds:input_type -> urbis.BoundsRequest
+	46, // 57: urbis.UrbisService.Save:input_type -> urbis.SaveRequest
+	48, // 58: urbis.UrbisService.Load:input_type -> urbis.LoadIndexRequest
+	50, // 59: urbis.UrbisService.Buffer:input_type -> urbis.BufferRequest
+	51, // 60: urbis.UrbisService.BufferPoint:input_type -> urbis.BufferPointRequest
+	53, // 61: urbis.UrbisService.Intersects:input_type -> urbis.IntersectsRequest
+	54, // 62: urbis.UrbisService.Contains:input_type -> urbis.ContainsRequest
+	55, // 63: urbis.UrbisService.Distance:input_type -> urbis.DistanceRequest
+	58, // 64: urbis.UrbisService.SpatialJoin:input_type -> urbis.SpatialJoinRequest
+	61, // 65: urbis.UrbisService.AggregateGrid:input_type -> urbis.GridAggregationRequest
+	64, // 66: urbis.UrbisService.Voronoi:input_type -> urbis.VoronoiRequest
+	67, // 67: urbis.UrbisService.Delaunay:input_type -> urbis.DelaunayRequest
+	70, // 68: urbis.UrbisService.ConvexHull:input_type -> urbis.ConvexHullRequest
+	13, // 69: urbis.UrbisService.CreateIndex:output_type -> urbis.CreateIndexResponse
+	15, // 70: urbis.UrbisService.DestroyIndex:output_type -> urbis.DestroyIndexResponse
+	17, // 71: urbis.UrbisService.ListIndexes:output_type -> urbis.ListIndexesResponse
+	21, // 72: urbis.UrbisService.LoadGeoJSON:output_type -> urbis.LoadResponse
+	21, // 73: urbis.UrbisService.LoadGeoJSONString:output_type -> urbis.LoadResponse
+	21, // 74: urbis.UrbisService.LoadWKT:output_type -> urbis.LoadResponse
+	25, // 75: urbis.UrbisService.InsertPoint:output_type -> urbis.InsertResponse
+	25, // 76: urbis.UrbisService.InsertLineString:output_type -> urbis.InsertResponse
+	25, // 77: urbis.UrbisService.InsertPolygon:output_type -> urbis.InsertResponse
+	27, // 78: urbis.UrbisService.Remove:output_type -> urbis.RemoveResponse
+	29, // 79: urbis.UrbisService.GetObject:output_type -> urbis.GetObjectResponse
+	31, // 80: urbis.UrbisService.Build:output_type -> urbis.BuildResponse
+	33, // 81: urbis.UrbisService.Optimize:output_type -> urbis.OptimizeResponse
+	37, // 82: urbis.UrbisService.QueryRange:output_type -> urbis.QueryResponse
+	37, // 83: urbis.UrbisService.QueryPoint:output_type -> urbis.QueryResponse
+	37, // 84: urbis.UrbisService.QueryKNN:output_type -> urbis.QueryResponse
+	37, // 85: urbis.UrbisService.QueryAdjacent:output_type -> urbis.QueryResponse
+	39, // 86: urbis.UrbisService.FindAdjacentPages:output_type -> urbis.AdjacentPagesResponse
+	41, // 87: urbis.UrbisService.GetStats:output_type -> urbis.StatsResponse
+	43, // 88: urbis.UrbisService.GetCount:output_type -> urbis.CountResponse
+	45, // 89: urbis.UrbisService.GetBounds:output_type -> urbis.BoundsResponse
+	47, // 90: urbis.UrbisService.Save:output_type -> urbis.SaveResponse
+	49, // 91: urbis.UrbisService.Load:output_type -> urbis.LoadIndexResponse
+	52, // 92: urbis.UrbisService.Buffer:output_type -> urbis.BufferResponse
+	52, // 93: urbis.UrbisService.BufferPoint:output_type -> urbis.BufferResponse
+	56, // 94: urbis.UrbisService.Intersects:output_type -> urbis.PredicateResponse
+	56, // 95: urbis.UrbisService.Contains:output_type -> urbis.PredicateResponse
+	57, // 96: urbis.UrbisService.Distance:output_type -> urbis.DistanceResponse
+	60, // 97: urbis.UrbisService.SpatialJoin:output_type -> urbis.SpatialJoinResponse
+	63, // 98: urbis.UrbisService.AggregateGrid:output_type -> urbis.GridAggregationResponse
+	66, // 99: urbis.UrbisService.Voronoi:output_type -> urbis.VoronoiResponse
+	69, // 100: urbis.UrbisService.Delaunay:output_type -> urbis.DelaunayResponse
+	71, // 101: urbis.UrbisService.ConvexHull:output_type -> urbis.ConvexHullResponse
+	69, // [69:102] is the sub-list for method output_type
+	36, // [36:69] is the sub-list for method input_type
+	36, // [36:36] is the sub-list for extension type_name
+	36, // [36:36] is the sub-list for extension extendee
+	0,  // [0:36] is the sub-list for field type_name
 }
 
 func init() { file_urbis_proto_init() }
@@ -2950,8 +4488,8 @@ func file_urbis_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_urbis_proto_rawDesc), len(file_urbis_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   47,
+			NumEnums:      3,
+			NumMessages:   69,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

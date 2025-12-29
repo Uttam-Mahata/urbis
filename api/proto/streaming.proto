@@ -1,0 +1,356 @@
+syntax = "proto3";
+
+package urbis;
+
+option go_package = "github.com/urbis/api/pkg/proto";
+
+import "urbis.proto";
+
+// =============================================================================
+// Real-Time Streaming Service
+// =============================================================================
+
+service UrbisStreamService {
+  // Bidirectional streaming for location updates
+  // Client sends location updates, receives events (geofence, proximity, etc.)
+  rpc StreamLocations(stream LocationUpdate) returns (stream StreamEvent);
+  
+  // Subscribe to all events from a stream context
+  rpc SubscribeEvents(SubscribeEventsRequest) returns (stream StreamEvent);
+  
+  // Geofence Management
+  rpc CreateGeofence(CreateGeofenceRequest) returns (CreateGeofenceResponse);
+  rpc UpdateGeofence(UpdateGeofenceRequest) returns (UpdateGeofenceResponse);
+  rpc DeleteGeofence(DeleteGeofenceRequest) returns (DeleteGeofenceResponse);
+  rpc ListGeofences(ListGeofencesRequest) returns (ListGeofencesResponse);
+  rpc CheckGeofence(CheckGeofenceRequest) returns (CheckGeofenceResponse);
+  rpc GetObjectsInZone(GetObjectsInZoneRequest) returns (GetObjectsInZoneResponse);
+  
+  // Proximity Management
+  rpc AddProximityRule(AddProximityRuleRequest) returns (AddProximityRuleResponse);
+  rpc RemoveProximityRule(RemoveProximityRuleRequest) returns (RemoveProximityRuleResponse);
+  rpc QueryProximity(QueryProximityRequest) returns (QueryProximityResponse);
+  
+  // Trajectory Analysis
+  rpc GetTrajectoryStats(GetTrajectoryStatsRequest) returns (TrajectoryStatsResponse);
+  rpc GetTrajectoryPath(GetTrajectoryPathRequest) returns (TrajectoryPathResponse);
+  rpc GetSimplifiedPath(GetSimplifiedPathRequest) returns (TrajectoryPathResponse);
+  
+  // Object Tracking
+  rpc UpdateLocation(LocationUpdate) returns (UpdateLocationResponse);
+  rpc BatchUpdateLocations(BatchLocationUpdate) returns (BatchUpdateResponse);
+  rpc GetTrackedObject(GetTrackedObjectRequest) returns (TrackedObjectResponse);
+  rpc RemoveTrackedObject(RemoveTrackedObjectRequest) returns (RemoveTrackedObjectResponse);
+  rpc QueryTrackedObjects(QueryTrackedObjectsRequest) returns (QueryTrackedObjectsResponse);
+  
+  // Stream Statistics
+  rpc GetStreamStats(GetStreamStatsRequest) returns (StreamStatsResponse);
+}
+
+// =============================================================================
+// Location Updates
+// =============================================================================
+
+message LocationUpdate {
+  uint64 object_id = 1;
+  double x = 2;                    // Longitude
+  double y = 3;                    // Latitude
+  uint64 timestamp = 4;            // Unix milliseconds
+  optional double speed = 5;       // m/s
+  optional double heading = 6;     // degrees (0-360)
+  map<string, string> metadata = 7;
+}
+
+message BatchLocationUpdate {
+  repeated LocationUpdate updates = 1;
+}
+
+message UpdateLocationResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message BatchUpdateResponse {
+  uint32 success_count = 1;
+  uint32 error_count = 2;
+  repeated string errors = 3;
+}
+
+// =============================================================================
+// Events
+// =============================================================================
+
+enum EventType {
+  EVENT_TYPE_UNSPECIFIED = 0;
+  EVENT_TYPE_GEOFENCE = 1;
+  EVENT_TYPE_PROXIMITY = 2;
+  EVENT_TYPE_TRAJECTORY = 3;
+  EVENT_TYPE_SPEED_ALERT = 4;
+  EVENT_TYPE_STOP_DETECTED = 5;
+  EVENT_TYPE_MOVEMENT_STARTED = 6;
+}
+
+enum GeofenceEventType {
+  GEOFENCE_EVENT_UNSPECIFIED = 0;
+  GEOFENCE_ENTER = 1;
+  GEOFENCE_EXIT = 2;
+  GEOFENCE_DWELL = 3;
+}
+
+message StreamEvent {
+  EventType type = 1;
+  uint64 timestamp = 2;
+  
+  oneof event {
+    GeofenceEvent geofence = 3;
+    ProximityEventData proximity = 4;
+    MovementEvent movement = 5;
+  }
+}
+
+message GeofenceEvent {
+  uint64 event_id = 1;
+  uint64 object_id = 2;
+  uint64 zone_id = 3;
+  GeofenceEventType event_type = 4;
+  Point position = 5;
+  uint64 dwell_time = 6;     // milliseconds (for DWELL events)
+  string zone_name = 7;
+}
+
+message ProximityEventData {
+  uint64 event_id = 1;
+  uint64 rule_id = 2;
+  uint64 object_a = 3;
+  uint64 object_b = 4;
+  double distance = 5;
+  Point position_a = 6;
+  Point position_b = 7;
+}
+
+message MovementEvent {
+  uint64 object_id = 1;
+  Point position = 2;
+  double speed = 3;
+  double heading = 4;
+}
+
+message SubscribeEventsRequest {
+  repeated EventType event_types = 1;   // Empty = all events
+  repeated uint64 object_ids = 2;       // Empty = all objects
+  repeated uint64 zone_ids = 3;         // Empty = all zones
+}
+
+// =============================================================================
+// Geofencing
+// =============================================================================
+
+message GeofenceZone {
+  uint64 zone_id = 1;
+  string name = 2;
+  Polygon boundary = 3;
+  bool active = 4;
+  uint64 dwell_threshold = 5;    // milliseconds, 0 = disabled
+}
+
+message CreateGeofenceRequest {
+  uint64 zone_id = 1;
+  string name = 2;
+  repeated Point boundary = 3;
+  uint64 dwell_threshold = 4;
+}
+
+message CreateGeofenceResponse {
+  bool success = 1;
+  uint64 zone_id = 2;
+  string error = 3;
+}
+
+message UpdateGeofenceRequest {
+  uint64 zone_id = 1;
+  optional string name = 2;
+  repeated Point boundary = 3;
+  optional bool active = 4;
+  optional uint64 dwell_threshold = 5;
+}
+
+message UpdateGeofenceResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message DeleteGeofenceRequest {
+  uint64 zone_id = 1;
+}
+
+message DeleteGeofenceResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message ListGeofencesRequest {
+  optional bool active_only = 1;
+}
+
+message ListGeofencesResponse {
+  repeated GeofenceZone zones = 1;
+}
+
+message CheckGeofenceRequest {
+  double x = 1;
+  double y = 2;
+}
+
+message CheckGeofenceResponse {
+  repeated uint64 zone_ids = 1;
+  repeated string zone_names = 2;
+}
+
+message GetObjectsInZoneRequest {
+  uint64 zone_id = 1;
+}
+
+message GetObjectsInZoneResponse {
+  repeated uint64 object_ids = 1;
+  uint32 count = 2;
+}
+
+// =============================================================================
+// Proximity
+// =============================================================================
+
+message AddProximityRuleRequest {
+  uint64 object_a = 1;           // 0 = any object
+  uint64 object_b = 2;           // 0 = any object
+  double threshold = 3;          // meters
+  bool one_shot = 4;             // fire once per proximity event
+}
+
+message AddProximityRuleResponse {
+  bool success = 1;
+  uint64 rule_id = 2;
+  string error = 3;
+}
+
+message RemoveProximityRuleRequest {
+  uint64 rule_id = 1;
+}
+
+message RemoveProximityRuleResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message QueryProximityRequest {
+  oneof query {
+    Point point = 1;
+    uint64 object_id = 2;
+  }
+  double distance = 3;           // meters
+}
+
+message QueryProximityResponse {
+  repeated uint64 object_ids = 1;
+  repeated double distances = 2;
+}
+
+// =============================================================================
+// Trajectory
+// =============================================================================
+
+message GetTrajectoryStatsRequest {
+  uint64 object_id = 1;
+  uint64 start_time = 2;         // Unix milliseconds
+  uint64 end_time = 3;           // Unix milliseconds
+}
+
+message TrajectoryStatsResponse {
+  uint64 object_id = 1;
+  double total_distance = 2;     // meters
+  double avg_speed = 3;          // m/s
+  double max_speed = 4;          // m/s
+  uint64 total_time = 5;         // milliseconds
+  uint64 moving_time = 6;        // milliseconds
+  uint64 stopped_time = 7;       // milliseconds
+  Point start_point = 8;
+  Point end_point = 9;
+  uint64 start_time = 10;
+  uint64 end_time = 11;
+  uint32 point_count = 12;
+  uint32 stop_count = 13;
+}
+
+message GetTrajectoryPathRequest {
+  uint64 object_id = 1;
+  uint64 start_time = 2;
+  uint64 end_time = 3;
+}
+
+message GetSimplifiedPathRequest {
+  uint64 object_id = 1;
+  uint64 start_time = 2;
+  uint64 end_time = 3;
+  double tolerance = 4;          // meters (Douglas-Peucker tolerance)
+}
+
+message TrajectoryPathResponse {
+  repeated Point points = 1;
+  repeated uint64 timestamps = 2;
+  uint32 point_count = 3;
+}
+
+// =============================================================================
+// Object Tracking
+// =============================================================================
+
+message GetTrackedObjectRequest {
+  uint64 object_id = 1;
+}
+
+message TrackedObjectResponse {
+  bool found = 1;
+  uint64 object_id = 2;
+  Point current_position = 3;
+  Point previous_position = 4;
+  double speed = 5;
+  double heading = 6;
+  uint64 timestamp = 7;
+  uint64 last_update = 8;
+  bool is_moving = 9;
+}
+
+message RemoveTrackedObjectRequest {
+  uint64 object_id = 1;
+}
+
+message RemoveTrackedObjectResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message QueryTrackedObjectsRequest {
+  MBR region = 1;
+}
+
+message QueryTrackedObjectsResponse {
+  repeated TrackedObjectResponse objects = 1;
+  uint32 count = 2;
+}
+
+// =============================================================================
+// Statistics
+// =============================================================================
+
+message GetStreamStatsRequest {}
+
+message StreamStatsResponse {
+  uint64 tracked_objects = 1;
+  uint64 geofence_zones = 2;
+  uint64 proximity_rules = 3;
+  uint64 pending_events = 4;
+  uint64 total_updates = 5;
+  uint64 total_events = 6;
+  uint64 geofence_events = 7;
+  uint64 proximity_events = 8;
+}
+

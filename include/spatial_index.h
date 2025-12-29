@@ -302,6 +302,55 @@ int adjacent_result_init(AdjacentPagesResult *result, size_t capacity);
  */
 void adjacent_result_free(AdjacentPagesResult *result);
 
+/* ============================================================================
+ * Spatial Join Operations
+ * ============================================================================ */
+
+#include "spatial_ops.h"
+
+/**
+ * @brief Perform spatial join between two indexes
+ * @param idx_a First index
+ * @param idx_b Second index
+ * @param join_type Type of spatial join
+ * @param distance Distance for JOIN_WITHIN type
+ * @return Join result, or NULL on error
+ */
+SpatialJoinResult* spatial_index_join(SpatialIndex *idx_a, SpatialIndex *idx_b,
+                                       SpatialJoinType join_type, double distance);
+
+/**
+ * @brief Perform self-join on a single index
+ * @param idx Index to self-join
+ * @param join_type Type of spatial join
+ * @param distance Distance for JOIN_WITHIN type
+ * @return Join result, or NULL on error
+ */
+SpatialJoinResult* spatial_index_self_join(SpatialIndex *idx,
+                                            SpatialJoinType join_type, double distance);
+
+/**
+ * @brief Perform grid-based spatial aggregation
+ * @param idx Index to aggregate
+ * @param bounds Area to aggregate (NULL for full extent)
+ * @param cell_size Size of grid cells
+ * @param agg_type Aggregation type
+ * @return Grid aggregation result, or NULL on error
+ */
+GridAggregation* spatial_index_aggregate_grid(SpatialIndex *idx, const MBR *bounds,
+                                               double cell_size, AggregationType agg_type);
+
+/**
+ * @brief Perform region-based spatial aggregation
+ * @param data_idx Index containing data to aggregate
+ * @param region_idx Index containing region polygons
+ * @param agg_type Aggregation type
+ * @return Region aggregation result, or NULL on error
+ */
+RegionAggregation* spatial_index_aggregate_regions(SpatialIndex *data_idx,
+                                                    SpatialIndex *region_idx,
+                                                    AggregationType agg_type);
+
 #ifdef __cplusplus
 }
 #endif

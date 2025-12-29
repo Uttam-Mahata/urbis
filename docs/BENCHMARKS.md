@@ -1,5 +1,49 @@
 # Urbis Performance Benchmarks
 
+## New: Advanced Spatial Operations
+
+Urbis now supports powerful spatial analysis operations:
+
+### Spatial Join
+Find all restaurants within 500m of metro stations:
+```bash
+grpcurl -plaintext -d '{
+  "index_a": "restaurants",
+  "index_b": "metro_stations",
+  "join_type": "JOIN_WITHIN",
+  "distance": 0.005
+}' localhost:50051 urbis.UrbisService/SpatialJoin
+```
+
+### Grid Aggregation
+Calculate density/counts per grid cell:
+```bash
+grpcurl -plaintext -d '{
+  "index_id": "city",
+  "bounds": {"min_x": 88.34, "min_y": 22.56, "max_x": 88.38, "max_y": 22.60},
+  "cell_size": 0.01,
+  "agg_type": "AGG_COUNT"
+}' localhost:50051 urbis.UrbisService/AggregateGrid
+```
+
+### Buffer
+Create buffer zones around objects:
+```bash
+grpcurl -plaintext -d '{
+  "x": 88.35,
+  "y": 22.57,
+  "distance": 0.01,
+  "segments": 32
+}' localhost:50051 urbis.UrbisService/BufferPoint
+```
+
+### Spatial Predicates
+- `Intersects` - Check if two objects intersect
+- `Contains` - Check if one object contains another
+- `Distance` - Calculate distance between objects
+
+---
+
 Benchmark results using real OpenStreetMap data from multiple cities.
 
 ## Test Environment

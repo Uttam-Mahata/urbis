@@ -42,6 +42,16 @@ const (
 	UrbisService_GetBounds_FullMethodName         = "/urbis.UrbisService/GetBounds"
 	UrbisService_Save_FullMethodName              = "/urbis.UrbisService/Save"
 	UrbisService_Load_FullMethodName              = "/urbis.UrbisService/Load"
+	UrbisService_Buffer_FullMethodName            = "/urbis.UrbisService/Buffer"
+	UrbisService_BufferPoint_FullMethodName       = "/urbis.UrbisService/BufferPoint"
+	UrbisService_Intersects_FullMethodName        = "/urbis.UrbisService/Intersects"
+	UrbisService_Contains_FullMethodName          = "/urbis.UrbisService/Contains"
+	UrbisService_Distance_FullMethodName          = "/urbis.UrbisService/Distance"
+	UrbisService_SpatialJoin_FullMethodName       = "/urbis.UrbisService/SpatialJoin"
+	UrbisService_AggregateGrid_FullMethodName     = "/urbis.UrbisService/AggregateGrid"
+	UrbisService_Voronoi_FullMethodName           = "/urbis.UrbisService/Voronoi"
+	UrbisService_Delaunay_FullMethodName          = "/urbis.UrbisService/Delaunay"
+	UrbisService_ConvexHull_FullMethodName        = "/urbis.UrbisService/ConvexHull"
 )
 
 // UrbisServiceClient is the client API for UrbisService service.
@@ -79,6 +89,17 @@ type UrbisServiceClient interface {
 	// Persistence
 	Save(ctx context.Context, in *SaveRequest, opts ...grpc.CallOption) (*SaveResponse, error)
 	Load(ctx context.Context, in *LoadIndexRequest, opts ...grpc.CallOption) (*LoadIndexResponse, error)
+	// Advanced Spatial Operations
+	Buffer(ctx context.Context, in *BufferRequest, opts ...grpc.CallOption) (*BufferResponse, error)
+	BufferPoint(ctx context.Context, in *BufferPointRequest, opts ...grpc.CallOption) (*BufferResponse, error)
+	Intersects(ctx context.Context, in *IntersectsRequest, opts ...grpc.CallOption) (*PredicateResponse, error)
+	Contains(ctx context.Context, in *ContainsRequest, opts ...grpc.CallOption) (*PredicateResponse, error)
+	Distance(ctx context.Context, in *DistanceRequest, opts ...grpc.CallOption) (*DistanceResponse, error)
+	SpatialJoin(ctx context.Context, in *SpatialJoinRequest, opts ...grpc.CallOption) (*SpatialJoinResponse, error)
+	AggregateGrid(ctx context.Context, in *GridAggregationRequest, opts ...grpc.CallOption) (*GridAggregationResponse, error)
+	Voronoi(ctx context.Context, in *VoronoiRequest, opts ...grpc.CallOption) (*VoronoiResponse, error)
+	Delaunay(ctx context.Context, in *DelaunayRequest, opts ...grpc.CallOption) (*DelaunayResponse, error)
+	ConvexHull(ctx context.Context, in *ConvexHullRequest, opts ...grpc.CallOption) (*ConvexHullResponse, error)
 }
 
 type urbisServiceClient struct {
@@ -319,6 +340,106 @@ func (c *urbisServiceClient) Load(ctx context.Context, in *LoadIndexRequest, opt
 	return out, nil
 }
 
+func (c *urbisServiceClient) Buffer(ctx context.Context, in *BufferRequest, opts ...grpc.CallOption) (*BufferResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BufferResponse)
+	err := c.cc.Invoke(ctx, UrbisService_Buffer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *urbisServiceClient) BufferPoint(ctx context.Context, in *BufferPointRequest, opts ...grpc.CallOption) (*BufferResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BufferResponse)
+	err := c.cc.Invoke(ctx, UrbisService_BufferPoint_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *urbisServiceClient) Intersects(ctx context.Context, in *IntersectsRequest, opts ...grpc.CallOption) (*PredicateResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PredicateResponse)
+	err := c.cc.Invoke(ctx, UrbisService_Intersects_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *urbisServiceClient) Contains(ctx context.Context, in *ContainsRequest, opts ...grpc.CallOption) (*PredicateResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PredicateResponse)
+	err := c.cc.Invoke(ctx, UrbisService_Contains_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *urbisServiceClient) Distance(ctx context.Context, in *DistanceRequest, opts ...grpc.CallOption) (*DistanceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DistanceResponse)
+	err := c.cc.Invoke(ctx, UrbisService_Distance_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *urbisServiceClient) SpatialJoin(ctx context.Context, in *SpatialJoinRequest, opts ...grpc.CallOption) (*SpatialJoinResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SpatialJoinResponse)
+	err := c.cc.Invoke(ctx, UrbisService_SpatialJoin_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *urbisServiceClient) AggregateGrid(ctx context.Context, in *GridAggregationRequest, opts ...grpc.CallOption) (*GridAggregationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GridAggregationResponse)
+	err := c.cc.Invoke(ctx, UrbisService_AggregateGrid_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *urbisServiceClient) Voronoi(ctx context.Context, in *VoronoiRequest, opts ...grpc.CallOption) (*VoronoiResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(VoronoiResponse)
+	err := c.cc.Invoke(ctx, UrbisService_Voronoi_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *urbisServiceClient) Delaunay(ctx context.Context, in *DelaunayRequest, opts ...grpc.CallOption) (*DelaunayResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DelaunayResponse)
+	err := c.cc.Invoke(ctx, UrbisService_Delaunay_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *urbisServiceClient) ConvexHull(ctx context.Context, in *ConvexHullRequest, opts ...grpc.CallOption) (*ConvexHullResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ConvexHullResponse)
+	err := c.cc.Invoke(ctx, UrbisService_ConvexHull_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UrbisServiceServer is the server API for UrbisService service.
 // All implementations must embed UnimplementedUrbisServiceServer
 // for forward compatibility.
@@ -354,6 +475,17 @@ type UrbisServiceServer interface {
 	// Persistence
 	Save(context.Context, *SaveRequest) (*SaveResponse, error)
 	Load(context.Context, *LoadIndexRequest) (*LoadIndexResponse, error)
+	// Advanced Spatial Operations
+	Buffer(context.Context, *BufferRequest) (*BufferResponse, error)
+	BufferPoint(context.Context, *BufferPointRequest) (*BufferResponse, error)
+	Intersects(context.Context, *IntersectsRequest) (*PredicateResponse, error)
+	Contains(context.Context, *ContainsRequest) (*PredicateResponse, error)
+	Distance(context.Context, *DistanceRequest) (*DistanceResponse, error)
+	SpatialJoin(context.Context, *SpatialJoinRequest) (*SpatialJoinResponse, error)
+	AggregateGrid(context.Context, *GridAggregationRequest) (*GridAggregationResponse, error)
+	Voronoi(context.Context, *VoronoiRequest) (*VoronoiResponse, error)
+	Delaunay(context.Context, *DelaunayRequest) (*DelaunayResponse, error)
+	ConvexHull(context.Context, *ConvexHullRequest) (*ConvexHullResponse, error)
 	mustEmbedUnimplementedUrbisServiceServer()
 }
 
@@ -432,6 +564,36 @@ func (UnimplementedUrbisServiceServer) Save(context.Context, *SaveRequest) (*Sav
 }
 func (UnimplementedUrbisServiceServer) Load(context.Context, *LoadIndexRequest) (*LoadIndexResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Load not implemented")
+}
+func (UnimplementedUrbisServiceServer) Buffer(context.Context, *BufferRequest) (*BufferResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Buffer not implemented")
+}
+func (UnimplementedUrbisServiceServer) BufferPoint(context.Context, *BufferPointRequest) (*BufferResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method BufferPoint not implemented")
+}
+func (UnimplementedUrbisServiceServer) Intersects(context.Context, *IntersectsRequest) (*PredicateResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Intersects not implemented")
+}
+func (UnimplementedUrbisServiceServer) Contains(context.Context, *ContainsRequest) (*PredicateResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Contains not implemented")
+}
+func (UnimplementedUrbisServiceServer) Distance(context.Context, *DistanceRequest) (*DistanceResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Distance not implemented")
+}
+func (UnimplementedUrbisServiceServer) SpatialJoin(context.Context, *SpatialJoinRequest) (*SpatialJoinResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SpatialJoin not implemented")
+}
+func (UnimplementedUrbisServiceServer) AggregateGrid(context.Context, *GridAggregationRequest) (*GridAggregationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AggregateGrid not implemented")
+}
+func (UnimplementedUrbisServiceServer) Voronoi(context.Context, *VoronoiRequest) (*VoronoiResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Voronoi not implemented")
+}
+func (UnimplementedUrbisServiceServer) Delaunay(context.Context, *DelaunayRequest) (*DelaunayResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Delaunay not implemented")
+}
+func (UnimplementedUrbisServiceServer) ConvexHull(context.Context, *ConvexHullRequest) (*ConvexHullResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ConvexHull not implemented")
 }
 func (UnimplementedUrbisServiceServer) mustEmbedUnimplementedUrbisServiceServer() {}
 func (UnimplementedUrbisServiceServer) testEmbeddedByValue()                      {}
@@ -868,6 +1030,186 @@ func _UrbisService_Load_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UrbisService_Buffer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BufferRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UrbisServiceServer).Buffer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UrbisService_Buffer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UrbisServiceServer).Buffer(ctx, req.(*BufferRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UrbisService_BufferPoint_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BufferPointRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UrbisServiceServer).BufferPoint(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UrbisService_BufferPoint_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UrbisServiceServer).BufferPoint(ctx, req.(*BufferPointRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UrbisService_Intersects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IntersectsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UrbisServiceServer).Intersects(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UrbisService_Intersects_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UrbisServiceServer).Intersects(ctx, req.(*IntersectsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UrbisService_Contains_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ContainsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UrbisServiceServer).Contains(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UrbisService_Contains_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UrbisServiceServer).Contains(ctx, req.(*ContainsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UrbisService_Distance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DistanceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UrbisServiceServer).Distance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UrbisService_Distance_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UrbisServiceServer).Distance(ctx, req.(*DistanceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UrbisService_SpatialJoin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SpatialJoinRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UrbisServiceServer).SpatialJoin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UrbisService_SpatialJoin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UrbisServiceServer).SpatialJoin(ctx, req.(*SpatialJoinRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UrbisService_AggregateGrid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GridAggregationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UrbisServiceServer).AggregateGrid(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UrbisService_AggregateGrid_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UrbisServiceServer).AggregateGrid(ctx, req.(*GridAggregationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UrbisService_Voronoi_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VoronoiRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UrbisServiceServer).Voronoi(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UrbisService_Voronoi_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UrbisServiceServer).Voronoi(ctx, req.(*VoronoiRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UrbisService_Delaunay_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DelaunayRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UrbisServiceServer).Delaunay(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UrbisService_Delaunay_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UrbisServiceServer).Delaunay(ctx, req.(*DelaunayRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UrbisService_ConvexHull_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConvexHullRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UrbisServiceServer).ConvexHull(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UrbisService_ConvexHull_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UrbisServiceServer).ConvexHull(ctx, req.(*ConvexHullRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UrbisService_ServiceDesc is the grpc.ServiceDesc for UrbisService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -966,6 +1308,46 @@ var UrbisService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Load",
 			Handler:    _UrbisService_Load_Handler,
+		},
+		{
+			MethodName: "Buffer",
+			Handler:    _UrbisService_Buffer_Handler,
+		},
+		{
+			MethodName: "BufferPoint",
+			Handler:    _UrbisService_BufferPoint_Handler,
+		},
+		{
+			MethodName: "Intersects",
+			Handler:    _UrbisService_Intersects_Handler,
+		},
+		{
+			MethodName: "Contains",
+			Handler:    _UrbisService_Contains_Handler,
+		},
+		{
+			MethodName: "Distance",
+			Handler:    _UrbisService_Distance_Handler,
+		},
+		{
+			MethodName: "SpatialJoin",
+			Handler:    _UrbisService_SpatialJoin_Handler,
+		},
+		{
+			MethodName: "AggregateGrid",
+			Handler:    _UrbisService_AggregateGrid_Handler,
+		},
+		{
+			MethodName: "Voronoi",
+			Handler:    _UrbisService_Voronoi_Handler,
+		},
+		{
+			MethodName: "Delaunay",
+			Handler:    _UrbisService_Delaunay_Handler,
+		},
+		{
+			MethodName: "ConvexHull",
+			Handler:    _UrbisService_ConvexHull_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

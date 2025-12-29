@@ -524,3 +524,206 @@ func (idx *Index) Sync() error {
 	return toError(C.urbis_sync(idx.ptr))
 }
 
+// =============================================================================
+// Advanced Spatial Operations
+// =============================================================================
+
+// JoinType represents the type of spatial join
+type JoinType int
+
+const (
+	JoinIntersects JoinType = 0
+	JoinWithin     JoinType = 1
+	JoinContains   JoinType = 2
+	JoinNearest    JoinType = 3
+)
+
+// AggType represents the aggregation type
+type AggType int
+
+const (
+	AggCount  AggType = 0
+	AggSum    AggType = 1
+	AggAvg    AggType = 2
+	AggMin    AggType = 3
+	AggMax    AggType = 4
+)
+
+// JoinPair represents a pair of matching objects from spatial join
+type JoinPair struct {
+	IDA      uint64
+	IDB      uint64
+	Distance float64
+}
+
+// JoinResult represents the result of a spatial join
+type JoinResult struct {
+	Pairs []JoinPair
+	Count uint64
+}
+
+// GridCell represents an aggregated grid cell
+type GridCell struct {
+	Value  float64
+	Count  uint64
+	Bounds MBR
+}
+
+// GridResult represents grid aggregation result
+type GridResult struct {
+	Cells    []GridCell
+	Rows     uint64
+	Cols     uint64
+	Bounds   MBR
+	CellSize float64
+}
+
+// Buffer creates a buffer zone around an object
+func (idx *Index) Buffer(objectID uint64, distance float64, segments int) ([]Point, error) {
+	poly := C.urbis_buffer(idx.ptr, C.uint64_t(objectID), C.double(distance), C.int(segments))
+	if poly == nil {
+		return nil, ErrNotFound
+	}
+	defer C.free(unsafe.Pointer(poly))
+	
+	// Convert polygon exterior to points
+	if poly.ext_count == 0 {
+		return []Point{}, nil
+	}
+	
+	points := make([]Point, poly.ext_count)
+	cpoints := unsafe.Slice(poly.exterior, poly.ext_count)
+	for i := range points {
+		points[i] = Point{X: float64(cpoints[i].x), Y: float64(cpoints[i].y)}
+	}
+	
+	return points, nil
+}
+
+// BufferPoint creates a buffer zone around a point
+func BufferPoint(x, y, distance float64, segments int) ([]Point, error) {
+	poly := C.urbis_buffer_point(C.double(x), C.double(y), C.double(distance), C.int(segments))
+	if poly == nil {
+		return nil, ErrAlloc
+	}
+	defer C.free(unsafe.Pointer(poly))
+	
+	if poly.ext_count == 0 {
+		return []Point{}, nil
+	}
+	
+	points := make([]Point, poly.ext_count)
+	cpoints := unsafe.Slice(poly.exterior, poly.ext_count)
+	for i := range points {
+		points[i] = Point{X: float64(cpoints[i].x), Y: float64(cpoints[i].y)}
+	}
+	
+	return points, nil
+}
+
+// Intersects checks if two objects intersect
+func (idx *Index) Intersects(idA, idB uint64) bool {
+	return bool(C.urbis_intersects(idx.ptr, C.uint64_t(idA), C.uint64_t(idB)))
+}
+
+// Contains checks if object A contains object B
+func (idx *Index) Contains(containerID, containedID uint64) bool {
+	return bool(C.urbis_contains(idx.ptr, C.uint64_t(containerID), C.uint64_t(containedID)))
+}
+
+// Distance calculates the distance between two objects
+func (idx *Index) Distance(idA, idB uint64) float64 {
+	return float64(C.urbis_distance(idx.ptr, C.uint64_t(idA), C.uint64_t(idB)))
+}
+
+// SpatialJoin performs a spatial join between two indexes
+func SpatialJoin(idxA, idxB *Index, joinType JoinType, distance float64) (*JoinResult, error) {
+	if idxA == nil || idxB == nil {
+		return nil, ErrNull
+	}
+	
+	result := C.urbis_spatial_join(idxA.ptr, idxB.ptr, C.int(joinType), C.double(distance))
+	if result == nil {
+		return nil, ErrAlloc
+	}
+	defer C.urbis_spatial_join_free(result)
+	
+	joinResult := &JoinResult{
+		Pairs: make([]JoinPair, result.count),
+		Count: uint64(result.count),
+	}
+	
+	if result.count > 0 {
+		idsA := unsafe.Slice(result.ids_a, result.count)
+		idsB := unsafe.Slice(result.ids_b, result.count)
+		distances := unsafe.Slice(result.distances, result.count)
+		
+		for i := range joinResult.Pairs {
+			joinResult.Pairs[i] = JoinPair{
+				IDA:      uint64(idsA[i]),
+				IDB:      uint64(idsB[i]),
+				Distance: float64(distances[i]),
+			}
+		}
+	}
+	
+	return joinResult, nil
+}
+
+// AggregateGrid performs grid-based spatial aggregation
+func (idx *Index) AggregateGrid(bounds *MBR, cellSize float64, aggType AggType) (*GridResult, error) {
+	var cBounds *C.MBR
+	if bounds != nil {
+		cb := C.MBR{
+			min_x: C.double(bounds.MinX),
+			min_y: C.double(bounds.MinY),
+			max_x: C.double(bounds.MaxX),
+			max_y: C.double(bounds.MaxY),
+		}
+		cBounds = &cb
+	}
+	
+	result := C.urbis_aggregate_grid(idx.ptr, cBounds, C.double(cellSize), C.int(aggType))
+	if result == nil {
+		return nil, ErrAlloc
+	}
+	defer C.urbis_grid_result_free(result)
+	
+	total := result.rows * result.cols
+	gridResult := &GridResult{
+		Cells:    make([]GridCell, total),
+		Rows:     uint64(result.rows),
+		Cols:     uint64(result.cols),
+		CellSize: float64(result.cell_size),
+		Bounds: MBR{
+			MinX: float64(result.bounds.min_x),
+			MinY: float64(result.bounds.min_y),
+			MaxX: float64(result.bounds.max_x),
+			MaxY: float64(result.bounds.max_y),
+		},
+	}
+	
+	if total > 0 {
+		values := unsafe.Slice(result.values, total)
+		counts := unsafe.Slice(result.counts, total)
+		
+		for i := uint64(0); i < uint64(total); i++ {
+			row := i / uint64(result.cols)
+			col := i % uint64(result.cols)
+			
+			gridResult.Cells[i] = GridCell{
+				Value: float64(values[i]),
+				Count: uint64(counts[i]),
+				Bounds: MBR{
+					MinX: gridResult.Bounds.MinX + float64(col)*gridResult.CellSize,
+					MinY: gridResult.Bounds.MinY + float64(row)*gridResult.CellSize,
+					MaxX: gridResult.Bounds.MinX + float64(col+1)*gridResult.CellSize,
+					MaxY: gridResult.Bounds.MinY + float64(row+1)*gridResult.CellSize,
+				},
+			}
+		}
+	}
+	
+	return gridResult, nil
+}
+

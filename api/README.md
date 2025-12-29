@@ -230,6 +230,65 @@ func main() {
 | `Save` | Save index to file |
 | `Load` | Load index from file |
 
+### Advanced Spatial Operations (NEW!)
+
+| RPC | Description |
+|-----|-------------|
+| `SpatialJoin` | Join two indexes by spatial relationship |
+| `AggregateGrid` | Aggregate objects into grid cells |
+| `Buffer` | Create buffer zone around object |
+| `BufferPoint` | Create buffer zone around a point |
+| `Intersects` | Check if two objects intersect |
+| `Contains` | Check if object A contains B |
+| `Distance` | Calculate distance between objects |
+| `Voronoi` | Generate Voronoi diagram |
+| `Delaunay` | Generate Delaunay triangulation |
+| `ConvexHull` | Compute convex hull of all objects |
+
+## Advanced Operations Examples
+
+### Spatial Join (Find restaurants near metro stations)
+
+```bash
+# Create two indexes
+grpcurl -plaintext -d '{"index_id": "restaurants"}' localhost:50051 urbis.UrbisService/CreateIndex
+grpcurl -plaintext -d '{"index_id": "metro_stations"}' localhost:50051 urbis.UrbisService/CreateIndex
+
+# Load data and build indexes...
+
+# Find all restaurants within 500m (0.005 degrees) of metro stations
+grpcurl -plaintext -d '{
+  "index_a": "restaurants",
+  "index_b": "metro_stations",
+  "join_type": "JOIN_WITHIN",
+  "distance": 0.005
+}' localhost:50051 urbis.UrbisService/SpatialJoin
+```
+
+### Grid Aggregation (Density map)
+
+```bash
+# Count objects per 1km grid cell
+grpcurl -plaintext -d '{
+  "index_id": "city",
+  "bounds": {"min_x": 88.34, "min_y": 22.56, "max_x": 88.38, "max_y": 22.60},
+  "cell_size": 0.01,
+  "agg_type": "AGG_COUNT"
+}' localhost:50051 urbis.UrbisService/AggregateGrid
+```
+
+### Buffer (Create zone around point)
+
+```bash
+# Create a 500m buffer around a point
+grpcurl -plaintext -d '{
+  "x": 88.35,
+  "y": 22.57,
+  "distance": 0.005,
+  "segments": 32
+}' localhost:50051 urbis.UrbisService/BufferPoint
+```
+
 ## Architecture
 
 ```
