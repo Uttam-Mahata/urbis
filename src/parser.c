@@ -213,6 +213,9 @@ static int parse_object(ParserState *state, JsonValue *value) {
     value->data.object.keys = (char **)malloc(capacity * sizeof(char *));
     value->data.object.values = (JsonValue *)malloc(capacity * sizeof(JsonValue));
     if (!value->data.object.keys || !value->data.object.values) {
+        /* Cleanup on allocation failure */
+        free(value->data.object.keys);
+        free(value->data.object.values);
         return PARSE_ERR_ALLOC;
     }
     
@@ -229,21 +232,36 @@ static int parse_object(ParserState *state, JsonValue *value) {
                                                 capacity * sizeof(char *));
             JsonValue *new_vals = (JsonValue *)realloc(value->data.object.values,
                                                         capacity * sizeof(JsonValue));
-            if (!new_keys || !new_vals) return PARSE_ERR_ALLOC;
+            if (!new_keys || !new_vals) {
+                /* Handle realloc failure: ensure we keep valid pointers if one succeeded */
+                if (new_keys) value->data.object.keys = new_keys;
+                if (new_vals) value->data.object.values = new_vals;
+                return PARSE_ERR_ALLOC;
+            }
             value->data.object.keys = new_keys;
             value->data.object.values = new_vals;
         }
         
         /* Parse key */
         int err = parse_string(state, &value->data.object.keys[value->data.object.count]);
-        if (err != PARSE_OK) return err;
+        if (err != PARSE_OK) {
+             return err;
+        }
         
         /* Expect colon */
-        if (expect(state, ':') != PARSE_OK) return PARSE_ERR_SYNTAX;
+        if (expect(state, ':') != PARSE_OK) {
+            /* Free the key we just parsed since we won't increment count */
+            free(value->data.object.keys[value->data.object.count]);
+            return PARSE_ERR_SYNTAX;
+        }
         
         /* Parse value */
         err = parse_value(state, &value->data.object.values[value->data.object.count]);
-        if (err != PARSE_OK) return err;
+        if (err != PARSE_OK) {
+            /* Free the key we just parsed since we won't increment count */
+            free(value->data.object.keys[value->data.object.count]);
+            return err;
+        }
         
         value->data.object.count++;
         
@@ -472,9 +490,14 @@ int geojson_parse_string(const char *json, FeatureCollection *result) {
         .column = 1
     };
     
+    /* Initialize root to empty/zero so we can safely free it if parse_value partially fails */
     JsonValue root;
+    memset(&root, 0, sizeof(JsonValue));
+
     err = parse_value(&state, &root);
     if (err != PARSE_OK) {
+        /* Ensure any partial allocations in root are freed */
+        json_value_free(&root);
         feature_collection_free(result);
         return err;
     }
