@@ -193,6 +193,11 @@ Tested with real OpenStreetMap data:
 
 📊 **[Full Benchmark Results](docs/BENCHMARKS.md)**
 
+## Documentation
+
+- **[Architecture Guide](docs/ARCHITECTURE.md)**: Internals, design decisions, and data flow.
+- **[API Reference](docs/API_REFERENCE.md)**: Detailed documentation of functions and data types.
+
 ### Try with Real Data
 
 ```bash
